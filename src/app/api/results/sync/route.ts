@@ -57,7 +57,7 @@ export async function POST() {
       'SUI': 'SUI', 'JPN': 'JPN', 'SEN': 'SEN', 'IRN': 'IRN', 'KOR': 'KOR',
       'ECU': 'ECU', 'AUT': 'AUT', 'TUR': 'TUR', 'AUS': 'AUS', 'CAN': 'CAN',
       'NOR': 'NOR', 'PAN': 'PAN', 'ALG': 'ALG', 'EGY': 'EGY', 'SCO': 'SCO',
-      'PAR': 'PRY', 'PAR': 'PRY', 'TUN': 'TUN', 'CIV': 'CIV', 'SWE': 'SWE',
+      'PAR': 'PRY', 'PRY': 'PRY', 'TUN': 'TUN', 'CIV': 'CIV', 'SWE': 'SWE',
       'CZE': 'CZE', 'UZB': 'UZB', 'QAT': 'QAT', 'CGO': 'COD', 'IRQ': 'IRQ',
       'KSA': 'SAU', 'RSA': 'ZAF', 'JOR': 'JOR', 'CPV': 'CPV', 'GHA': 'GHA',
       'BIH': 'BIH', 'CUW': 'CUW', 'HAI': 'HTI', 'NZL': 'NZL',

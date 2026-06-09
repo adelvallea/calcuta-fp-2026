@@ -84,27 +84,31 @@ export default function DashboardPage() {
   const soldAmount = lots.filter(l => l.status === 'sold').reduce((s, l) => s + (l.final_price ?? 0), 0)
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-brand-blue">Dashboard</h1>
-          <p className="text-sm text-brand-slate">Gran Calcuta · Mundial 2026</p>
-        </div>
-        <div className="flex gap-3">
-          {activeLot ? (
-            <Link href={`/auction/live/${activeLot.id}`} className="btn-gold">
-              <Gavel className="h-4 w-4" />
-              En vivo — Lote {activeLot.number}
-            </Link>
-          ) : (
-            <Link href="/auction" className="btn-primary">
-              <Gavel className="h-4 w-4" />Ir a Subasta
-            </Link>
-          )}
+    <div className="space-y-0">
+      {/* Banner con imagen de fondo */}
+      <div className="relative h-40 overflow-hidden bg-brand-navy"
+        style={{ backgroundImage: 'url(/players/player-3.jpg)', backgroundSize: 'cover', backgroundPosition: 'center top' }}>
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-navy via-brand-navy/60 to-brand-navy/20" />
+        <div className="absolute inset-0 flex items-end justify-between px-6 pb-5 z-10">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-brand-gold">Calcuta FP</p>
+            <h1 className="text-2xl font-black text-white">Dashboard · Mundial 2026</h1>
+          </div>
+          <div>
+            {activeLot ? (
+              <Link href={`/auction/live/${activeLot.id}`} className="btn-gold">
+                <Gavel className="h-4 w-4" /> En vivo
+              </Link>
+            ) : (
+              <Link href="/auction" className="btn-primary">
+                <Gavel className="h-4 w-4" /> Subasta
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
+      <div className="p-6 space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
@@ -257,6 +261,7 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+      </div> {/* cierre px-6 */}
     </div>
   )
 }

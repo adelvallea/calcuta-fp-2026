@@ -7,6 +7,7 @@ import { parseProbs, getLotDisplayProbs, flagCode } from '@/lib/lot-utils'
 import type { Participant, Lot, PrizeRule, Team, SponsorContribution } from '@/types'
 import toast from 'react-hot-toast'
 import { Gavel, Trophy, Users, DollarSign, Plus, Minus } from 'lucide-react'
+import PlayerCarousel from '@/components/ui/PlayerCarousel'
 
 interface RegisteredViewer { id: string; name: string }
 
@@ -122,34 +123,65 @@ export default function PublicPage() {
   // ── REGISTRO ────────────────────────────────────────────────────────────────
   if (!viewer) {
     return (
-      <div className="min-h-screen bg-brand-bg flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-full">
-          <div className="text-center mb-6">
-            <span className="text-4xl">⚽</span>
-            <h1 className="text-xl font-black text-brand-navy mt-2">{settings?.event_name ?? 'Gran Calcuta · Mundial 2026'}</h1>
-            <p className="text-sm text-brand-slate mt-1">Ingresa para ver y pujar en tiempo real</p>
+      <div className="min-h-screen flex">
+        {/* Mitad izquierda: carrusel de fotos — oculto en móvil */}
+        <div className="hidden md:block md:w-1/2 relative">
+          <PlayerCarousel className="h-full w-full" overlay="dark" interval={4500} />
+          {/* Texto sobre el carrusel */}
+          <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 px-8 text-center z-10">
+            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-brand-gold mb-2">
+              Calcuta FP
+            </p>
+            <h2 className="text-3xl font-black text-white leading-tight">
+              Mundial 2026
+            </h2>
+            <p className="text-sm text-white/60 mt-2">
+              La quiniela de los campeones
+            </p>
           </div>
-          <div className="space-y-3">
-            <div>
-              <label className="text-xs font-semibold text-gray-500 mb-1 block">Tu nombre</label>
-              <input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })}
-                onKeyDown={(e) => e.key === 'Enter' && register()}
-                placeholder="Nombre completo"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-brand-gold focus:outline-none" />
+        </div>
+
+        {/* Mitad derecha: formulario */}
+        <div className="flex-1 flex items-center justify-center p-6 bg-white">
+          <div className="w-full max-w-sm">
+            {/* Logo / header */}
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-brand-navy mb-4 overflow-hidden">
+                <img src="/logo.png" alt="FP" className="h-14 w-14 object-contain"
+                  onError={(e) => { (e.target as HTMLImageElement).src = '/logo.svg' }} />
+              </div>
+              <h1 className="text-2xl font-black text-brand-navy">Calcuta FP 2026</h1>
+              <p className="text-sm text-brand-slate mt-1">Ingresa para ver y pujar en tiempo real</p>
             </div>
-            <div>
-              <label className="text-xs font-semibold text-gray-500 mb-1 block">Teléfono (opcional)</label>
-              <input value={regForm.phone} onChange={(e) => setRegForm({ ...regForm, phone: e.target.value })}
-                placeholder="+52..."
-                className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-brand-gold focus:outline-none" />
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-gray-500 mb-1.5 block">Tu nombre</label>
+                <input value={regForm.name} onChange={(e) => setRegForm({ ...regForm, name: e.target.value })}
+                  onKeyDown={(e) => e.key === 'Enter' && register()}
+                  placeholder="Nombre completo"
+                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-brand-gold focus:outline-none focus:ring-2 focus:ring-brand-gold/20" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 mb-1.5 block">Teléfono (opcional)</label>
+                <input value={regForm.phone} onChange={(e) => setRegForm({ ...regForm, phone: e.target.value })}
+                  placeholder="+52..."
+                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-brand-gold focus:outline-none focus:ring-2 focus:ring-brand-gold/20" />
+              </div>
+              <button onClick={register} className="btn-gold w-full justify-center py-3.5 text-base rounded-xl mt-2">
+                Entrar a la Calcuta
+              </button>
             </div>
-            <button onClick={register} className="btn-gold w-full justify-center py-3 text-base mt-2">
-              Entrar
-            </button>
+
+            {/* Fondo decorativo móvil */}
+            <div className="md:hidden mt-8">
+              <PlayerCarousel className="h-32 w-full rounded-xl" overlay="dark" interval={3000} />
+            </div>
+
+            <p className="text-[10px] text-gray-400 text-center mt-4">
+              Si ya eres participante, usa exactamente el mismo nombre para identificarte.
+            </p>
           </div>
-          <p className="text-[10px] text-gray-400 text-center mt-4">
-            Si ya eres participante, usa exactamente el mismo nombre para identificarte.
-          </p>
         </div>
       </div>
     )

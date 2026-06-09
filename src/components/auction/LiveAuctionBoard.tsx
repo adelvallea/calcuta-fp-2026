@@ -11,6 +11,7 @@ import {
   ChevronLeft, ChevronRight, Gavel, CheckCircle,
   PauseCircle, Plus, Minus, Info
 } from 'lucide-react'
+import PlayerCarousel from '@/components/ui/PlayerCarousel'
 
 interface Props {
   initialLot: Lot & { teams: Team[]; bids: Bid[] }
@@ -107,16 +108,19 @@ export default function LiveAuctionBoard({ initialLot, allLots, participants, se
   return (
     <div className={`min-h-screen flex flex-col transition-colors duration-700 ${soldFlash ? 'bg-green-50' : 'bg-brand-bg'}`}>
 
-      {/* ── TOP BAR ─────────────────────────────────────────────────────────── */}
-      <header className="bg-brand-navy px-6 py-3 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-3">
+      {/* ── TOP BAR con foto de fondo ────────────────────────────────────────── */}
+      <header className="relative bg-brand-navy px-6 py-3 flex items-center justify-between shrink-0 overflow-hidden">
+        {/* Foto sutil de fondo */}
+        <PlayerCarousel className="absolute inset-0 opacity-20" overlay="none" interval={6000} />
+        {/* Contenido del header sobre la foto */}
+        <div className="relative z-10 flex items-center gap-3">
           <span className="text-2xl">⚽</span>
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-brand-gold">Calcuta FP</p>
             <p className="text-[10px] text-white/40 -mt-0.5">Mundial 2026</p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="relative z-10 flex items-center gap-4">
           {prevLot && (
             <button onClick={() => router.push(`/auction/live/${prevLot.id}`)}
               className="flex items-center gap-1 text-xs text-white/50 hover:text-white transition">
