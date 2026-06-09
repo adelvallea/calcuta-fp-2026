@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Campeón",
+    "description": "Equipo que gane la Final del Mundial 2026",
+    "final_position": 1,
+    "percentage": 30,
+    "enabled": true,
+    "sort_order": 1
+  },
+  {
+    "name": "Subcampeón",
+    "description": "Equipo que pierda la Final del Mundial 2026",
+    "final_position": 2,
+    "percentage": 20,
+    "enabled": true,
+    "sort_order": 2
+  },
+  {
+    "name": "3.er Lugar",
+    "description": "Ganador del partido por el 3.er y 4.º puesto",
+    "final_position": 3,
+    "percentage": 10,
+    "enabled": true,
+    "sort_order": 3
+  },
+  {
+    "name": "Lugar 32",
+    "description": "Peor equipo clasificado a la ronda de 16avos (el último entre los que superan la fase de grupos)",
+    "final_position": 32,
+    "percentage": 20,
+    "enabled": true,
+    "sort_order": 4
+  },
+  {
+    "name": "Último Lugar",
+    "description": "Equipo con la peor clasificación final oficial FIFA (posición 48)",
+    "final_position": 48,
+    "percentage": 20,
+    "enabled": true,
+    "sort_order": 5
+  }
+]

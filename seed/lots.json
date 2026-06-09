@@ -1,0 +1,92 @@
+[
+  {
+    "number": 1, "title": "Lote 1 — España", "type": "solo",
+    "teams": ["España"],
+    "prob_champion": 14.27, "prob_pos32": 0.0, "prob_last": 0.0
+  },
+  {
+    "number": 2, "title": "Lote 2 — Francia", "type": "solo",
+    "teams": ["Francia"],
+    "prob_champion": 13.08, "prob_pos32": 0.0, "prob_last": 0.0
+  },
+  {
+    "number": 3, "title": "Lote 3 — Inglaterra", "type": "solo",
+    "teams": ["Inglaterra"],
+    "prob_champion": 10.47, "prob_pos32": 0.0, "prob_last": 0.0
+  },
+  {
+    "number": 4, "title": "Lote 4 — Brasil", "type": "solo",
+    "teams": ["Brasil"],
+    "prob_champion": 8.72, "prob_pos32": 0.0, "prob_last": 0.0
+  },
+  {
+    "number": 5, "title": "Lote 5 — Portugal", "type": "solo",
+    "teams": ["Portugal"],
+    "prob_champion": 8.72, "prob_pos32": 0.0, "prob_last": 0.0
+  },
+  {
+    "number": 6, "title": "Lote 6 — Argentina", "type": "solo",
+    "teams": ["Argentina"],
+    "prob_champion": 7.85, "prob_pos32": 0.0, "prob_last": 0.0
+  },
+  {
+    "number": 7, "title": "Lote 7 — Alemania", "type": "solo",
+    "teams": ["Alemania"],
+    "prob_champion": 5.23, "prob_pos32": 0.02, "prob_last": 0.0
+  },
+  {
+    "number": 8, "title": "Lote 8 — Países Bajos + Noruega + Bélgica", "type": "combo",
+    "teams": ["Países Bajos", "Noruega", "Bélgica"],
+    "prob_champion": 9.07, "prob_pos32": 1.01, "prob_last": 0.0
+  },
+  {
+    "number": 9, "title": "Lote 9 — Japón + Canadá + Sudáfrica + Iraq", "type": "combo",
+    "teams": ["Japón", "Canadá", "Sudáfrica", "Iraq"],
+    "prob_champion": 2.68, "prob_pos32": 9.85, "prob_last": 10.82
+  },
+  {
+    "number": 10, "title": "Lote 10 — USA + Croacia + Ghana + Haití", "type": "combo",
+    "teams": ["USA", "Croacia", "Ghana", "Haití"],
+    "prob_champion": 2.66, "prob_pos32": 9.95, "prob_last": 10.67
+  },
+  {
+    "number": 11, "title": "Lote 11 — Uruguay + Suiza + Arabia Saudita + Jordania", "type": "combo",
+    "teams": ["Uruguay", "Suiza", "Arabia Saudita", "Jordania"],
+    "prob_champion": 2.66, "prob_pos32": 9.95, "prob_last": 10.57
+  },
+  {
+    "number": 12, "title": "Lote 12 — México + Turquía + Uzbekistán + Nueva Zelanda", "type": "combo",
+    "teams": ["México", "Turquía", "Uzbekistán", "Nueva Zelanda"],
+    "prob_champion": 2.66, "prob_pos32": 9.91, "prob_last": 10.55
+  },
+  {
+    "number": 13, "title": "Lote 13 — Marruecos + Ecuador + Argelia + RD Congo", "type": "combo",
+    "teams": ["Marruecos", "Ecuador", "Argelia", "RD Congo"],
+    "prob_champion": 2.84, "prob_pos32": 9.58, "prob_last": 10.64
+  },
+  {
+    "number": 14, "title": "Lote 14 — Colombia + Senegal + Bosnia y Herzegovina + República Checa", "type": "combo",
+    "teams": ["Colombia", "Senegal", "Bosnia y Herzegovina", "República Checa"],
+    "prob_champion": 3.35, "prob_pos32": 8.83, "prob_last": 11.01
+  },
+  {
+    "number": 15, "title": "Lote 15 — Costa de Marfil + Panamá + Cabo Verde", "type": "combo",
+    "teams": ["Costa de Marfil", "Panamá", "Cabo Verde"],
+    "prob_champion": 1.04, "prob_pos32": 8.33, "prob_last": 11.13
+  },
+  {
+    "number": 16, "title": "Lote 16 — Escocia + Irán + Catar", "type": "combo",
+    "teams": ["Escocia", "Irán", "Catar"],
+    "prob_champion": 1.04, "prob_pos32": 8.31, "prob_last": 11.07
+  },
+  {
+    "number": 17, "title": "Lote 17 — Austria + Corea del Sur + Egipto + Curazao", "type": "combo",
+    "teams": ["Austria", "Corea del Sur", "Egipto", "Curazao"],
+    "prob_champion": 1.82, "prob_pos32": 12.15, "prob_last": 6.80
+  },
+  {
+    "number": 18, "title": "Lote 18 — Paraguay + Australia + Suecia + Túnez", "type": "combo",
+    "teams": ["Paraguay", "Australia", "Suecia", "Túnez"],
+    "prob_champion": 1.82, "prob_pos32": 12.11, "prob_last": 6.74
+  }
+]
