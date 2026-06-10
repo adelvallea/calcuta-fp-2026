@@ -166,12 +166,6 @@ export default function PublicPage() {
                   placeholder="Nombre completo"
                   className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-brand-gold focus:outline-none focus:ring-2 focus:ring-brand-gold/20" />
               </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1.5 block">Teléfono (opcional)</label>
-                <input value={regForm.phone} onChange={(e) => setRegForm({ ...regForm, phone: e.target.value })}
-                  placeholder="+52..."
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-brand-gold focus:outline-none focus:ring-2 focus:ring-brand-gold/20" />
-              </div>
               <button onClick={register} className="btn-gold w-full justify-center py-3.5 text-base rounded-xl mt-2">
                 Entrar a la Calcuta
               </button>
