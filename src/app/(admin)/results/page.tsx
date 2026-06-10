@@ -356,10 +356,16 @@ function GroupTable({ letter, teams, fmtGD, STATUS_COLOR, STATUS_LABEL }: {
   letter: string; teams: Team[]; fmtGD: (n: number) => string
   STATUS_COLOR: Record<string, string>; STATUS_LABEL: Record<string, string>
 }) {
+  // Solo mostrar palomita si hay equipos que ya clasificaron (tienen partidos jugados)
+  const anyPlayed = teams.some(t => t.matches_played > 0)
+
   return (
     <div className="rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden">
-      <div className="flex items-center gap-2 bg-brand-navy px-4 py-2.5">
+      <div className="flex items-center justify-between bg-brand-navy px-4 py-2.5">
         <span className="text-lg font-black text-brand-gold">Grupo {letter}</span>
+        {anyPlayed && (
+          <span className="text-[9px] text-green-400 font-medium">✓ clasificado</span>
+        )}
       </div>
       <table className="w-full text-xs">
         <thead>
@@ -372,10 +378,10 @@ function GroupTable({ letter, teams, fmtGD, STATUS_COLOR, STATUS_LABEL }: {
         </thead>
         <tbody>
           {teams.map((team, i) => (
-            <tr key={team.id} className={`border-b border-gray-50 last:border-0 ${i < 2 ? 'bg-green-50/30' : ''}`}>
+            <tr key={team.id} className={`border-b border-gray-50 last:border-0 ${anyPlayed && i < 2 ? 'bg-green-50/30' : ''}`}>
               <td className="px-3 py-2">
                 <div className="flex items-center gap-1.5">
-                  {i < 2 && <span className="text-green-500 font-bold text-[9px]">✓</span>}
+                  {anyPlayed && i < 2 && <span className="text-green-500 font-bold text-[9px]">✓</span>}
                   <img src={`https://flagcdn.com/w40/${flagCode(team.country_code)}.png`}
                     alt={team.name} className="h-3 w-4 rounded object-cover"
                     onError={e => { (e.target as HTMLImageElement).style.display='none' }} />

@@ -132,7 +132,8 @@ export default function PublicPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-brand-navy via-brand-navy/30 to-transparent" />
             {/* Texto encima */}
             <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 px-8 text-center z-10">
-              <img src="/logo.svg" alt="FP" className="h-16 w-16 mb-3 drop-shadow-lg" />
+              <img src="/logo.png" alt="FP" className="h-16 w-16 mb-3 drop-shadow-lg"
+                onError={(e) => { (e.target as HTMLImageElement).src = '/logo.svg' }} />
               <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-brand-gold mb-1">Calcuta FP</p>
               <h2 className="text-3xl font-black text-white leading-tight">Mundial 2026</h2>
               <p className="text-sm text-white/60 mt-2">La quiniela de los campeones</p>

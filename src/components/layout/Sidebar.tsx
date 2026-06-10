@@ -33,9 +33,10 @@ export default function Sidebar() {
         <div className="relative z-10 flex items-center gap-3 px-4 py-4">
           <div className="h-12 w-12 shrink-0 rounded-xl overflow-hidden bg-white/95 flex items-center justify-center shadow-lg">
             <img
-              src="/logo.svg"
+              src="/logo.png"
               alt="FP"
               className="h-11 w-11 object-contain"
+              onError={(e) => { (e.target as HTMLImageElement).src = '/logo.svg' }}
             />
           </div>
           <div>
