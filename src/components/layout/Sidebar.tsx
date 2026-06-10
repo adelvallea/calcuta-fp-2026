@@ -10,11 +10,11 @@ import {
 const nav = [
   { href: '/dashboard',    label: 'Dashboard',      icon: LayoutDashboard },
   { href: '/auction',      label: 'Subasta',         icon: Gavel },
-  { href: '/participants', label: 'Participantes',   icon: Users },
+  { href: '/participants', label: 'FParticipantes',  icon: Users },
   { href: '/lots',         label: 'Lotes',           icon: List },
-  { href: '/payments',     label: 'Pagos',           icon: CreditCard },
+  { href: '/payments',     label: 'FPagos',          icon: CreditCard },
   { href: '/results',      label: 'Resultados',      icon: Globe },
-  { href: '/prizes',       label: 'Premios',         icon: Trophy },
+  { href: '/prizes',       label: 'FPremios',        icon: Trophy },
   { href: '/settings',     label: 'Configuración',   icon: Settings },
 ]
 
