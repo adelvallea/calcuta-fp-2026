@@ -25,17 +25,17 @@ export default function Sidebar() {
     <aside className="flex h-full w-56 flex-col bg-brand-navy text-white shrink-0">
 
       {/* Hero foto grupal + logo */}
-      <div className="relative border-b border-white/10 overflow-hidden" style={{ height: '110px' }}>
+      <div className="relative border-b border-white/10 overflow-hidden" style={{ height: '130px' }}>
         {/* Foto grupal de fondo */}
         <img src="/hero.jpg" alt="" className="absolute inset-0 h-full w-full object-cover object-top opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-brand-navy/30 to-brand-navy/90" />
         {/* Logo + texto */}
         <div className="relative z-10 flex items-center gap-3 px-4 py-4">
-          <div className="h-12 w-12 shrink-0 rounded-xl overflow-hidden bg-white/95 flex items-center justify-center shadow-lg">
+          <div className="h-16 w-16 shrink-0 rounded-xl overflow-hidden bg-white/95 flex items-center justify-center shadow-lg">
             <img
               src="/logo.png"
               alt="FP"
-              className="h-11 w-11 object-contain"
+              className="h-15 w-15 object-contain"
               onError={(e) => { (e.target as HTMLImageElement).src = '/logo.svg' }}
             />
           </div>
