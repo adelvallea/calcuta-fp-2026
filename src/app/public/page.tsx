@@ -188,25 +188,33 @@ export default function PublicPage() {
   // ── VISTA PRINCIPAL ─────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-brand-bg">
-      {/* Header */}
-      <header className="bg-brand-navy text-white py-4 px-4 flex items-center justify-between">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-gold">Vista Participante</p>
-          <p className="text-sm font-bold">{settings?.event_name ?? 'Gran Calcuta · Mundial 2026'}</p>
+
+      {/* ── HERO HEADER con foto grupal ───────────────────────────────────── */}
+      <header className="relative overflow-hidden" style={{ height: '180px' }}>
+        <img src="/hero.jpg" alt="" className="absolute inset-0 h-full w-full object-cover object-center" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-navy/60 via-brand-navy/50 to-brand-navy/90" />
+        <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
+          <img src="/logo.png" alt="FP" className="h-14 w-14 mb-2 drop-shadow-xl"
+            onError={(e) => { (e.target as HTMLImageElement).src = '/logo.svg' }} />
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-gold">Calcuta FP · Mundial 2026</p>
+          <p className="text-white/60 text-xs mt-1">Hola, <strong className="text-brand-gold">{viewer.name}</strong></p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="text-right">
-            <p className="text-xs text-white/60">Sesión</p>
-            <p className="text-sm font-bold text-brand-gold">{viewer.name}</p>
-          </div>
-          <button onClick={() => setViewer(null)} className="text-xs text-white/40 hover:text-white underline">Salir</button>
-        </div>
+        <button onClick={() => setViewer(null)}
+          className="absolute top-3 right-4 z-10 text-[10px] text-white/50 hover:text-white underline">
+          Salir
+        </button>
       </header>
 
+      {/* Strip de fotos de jugadores */}
+      <div className="h-16 overflow-hidden">
+        <PlayerCarousel className="h-full w-full" overlay="none" interval={2500} />
+      </div>
+
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+
         {/* Stats rápidas */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="card text-center">
+          <div className="card text-center border-brand-gold/30 bg-amber-50">
             <DollarSign className="h-5 w-5 text-brand-gold mx-auto mb-1" />
             <p className="text-lg font-black text-brand-navy">{fmt(pool?.total_pool ?? 0)}</p>
             <p className="text-[10px] text-gray-400 uppercase">Bolsa</p>
@@ -219,7 +227,7 @@ export default function PublicPage() {
           <div className="card text-center">
             <Users className="h-5 w-5 text-brand-slate mx-auto mb-1" />
             <p className="text-lg font-black text-brand-navy">{participants.length}</p>
-            <p className="text-[10px] text-gray-400 uppercase">Participantes</p>
+            <p className="text-[10px] text-gray-400 uppercase">FParticipantes</p>
           </div>
         </div>
 
@@ -337,9 +345,10 @@ export default function PublicPage() {
         {/* Premios */}
         {pool?.prizes && (
           <section>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-brand-slate mb-3">
-              <Trophy className="inline h-3.5 w-3.5 mr-1" /> Premios estimados
-            </h2>
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy className="h-4 w-4 text-brand-gold" />
+              <h2 className="text-xs font-bold uppercase tracking-widest text-brand-slate">FPremios estimados</h2>
+            </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
               {pool.prizes.map((p: any) => (
                 <div key={p.rule.id} className="rounded-xl bg-white border border-gray-100 p-3 text-center shadow-sm">
@@ -355,6 +364,15 @@ export default function PublicPage() {
             </div>
           </section>
         )}
+
+        {/* Separador con foto */}
+        <div className="relative h-24 rounded-2xl overflow-hidden">
+          <PlayerCarousel className="h-full w-full" overlay="dark" interval={5000} />
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <img src="/logo.png" alt="FP" className="h-10 w-10 opacity-80"
+              onError={(e) => { (e.target as HTMLImageElement).src = '/logo.svg' }} />
+          </div>
+        </div>
 
         {/* Lotes vendidos */}
         <section>
@@ -393,6 +411,21 @@ export default function PublicPage() {
             )}
           </div>
         </section>
+
+        {/* Footer */}
+        <footer className="relative rounded-2xl overflow-hidden" style={{ height: '100px' }}>
+          <img src="/hero.jpg" alt="" className="absolute inset-0 h-full w-full object-cover object-top" />
+          <div className="absolute inset-0 bg-brand-navy/75" />
+          <div className="relative z-10 h-full flex items-center justify-center gap-3">
+            <img src="/logo.png" alt="FP" className="h-10 w-10"
+              onError={(e) => { (e.target as HTMLImageElement).src = '/logo.svg' }} />
+            <div className="text-center">
+              <p className="text-xs font-black text-white">Calcuta FP · Mundial 2026</p>
+              <p className="text-[10px] text-brand-gold mt-0.5">La quiniela de los campeones</p>
+            </div>
+          </div>
+        </footer>
+
       </div>
     </div>
   )
