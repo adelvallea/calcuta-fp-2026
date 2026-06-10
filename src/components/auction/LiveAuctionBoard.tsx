@@ -11,7 +11,6 @@ import {
   ChevronLeft, ChevronRight, Gavel, CheckCircle,
   PauseCircle, Plus, Minus, Info
 } from 'lucide-react'
-import PlayerCarousel from '@/components/ui/PlayerCarousel'
 
 interface Props {
   initialLot: Lot & { teams: Team[]; bids: Bid[] }
@@ -111,7 +110,8 @@ export default function LiveAuctionBoard({ initialLot, allLots, participants, se
       {/* ── TOP BAR con foto de fondo ────────────────────────────────────────── */}
       <header className="relative bg-brand-navy px-6 py-3 flex items-center justify-between shrink-0 overflow-hidden">
         {/* Foto sutil de fondo */}
-        <PlayerCarousel className="absolute inset-0 opacity-20" overlay="none" interval={6000} />
+        {/* Hero foto grupal con baja opacidad */}
+        <img src="/hero.jpg" alt="" className="absolute inset-0 h-full w-full object-cover object-center opacity-15" />
         {/* Contenido del header sobre la foto */}
         <div className="relative z-10 flex items-center gap-3">
           <span className="text-2xl">⚽</span>

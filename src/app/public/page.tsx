@@ -124,20 +124,23 @@ export default function PublicPage() {
   if (!viewer) {
     return (
       <div className="min-h-screen flex">
-        {/* Mitad izquierda: carrusel de fotos — oculto en móvil */}
-        <div className="hidden md:block md:w-1/2 relative">
-          <PlayerCarousel className="h-full w-full" overlay="dark" interval={4500} />
-          {/* Texto sobre el carrusel */}
-          <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 px-8 text-center z-10">
-            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-brand-gold mb-2">
-              Calcuta FP
-            </p>
-            <h2 className="text-3xl font-black text-white leading-tight">
-              Mundial 2026
-            </h2>
-            <p className="text-sm text-white/60 mt-2">
-              La quiniela de los campeones
-            </p>
+        {/* Mitad izquierda: foto grupal hero — oculto en móvil */}
+        <div className="hidden md:flex md:w-1/2 relative flex-col">
+          {/* Foto grupal como fondo principal */}
+          <div className="flex-1 relative overflow-hidden">
+            <img src="/hero.jpg" alt="Equipo México" className="absolute inset-0 h-full w-full object-cover object-center" />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-navy via-brand-navy/30 to-transparent" />
+            {/* Texto encima */}
+            <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 px-8 text-center z-10">
+              <img src="/logo.svg" alt="FP" className="h-16 w-16 mb-3 drop-shadow-lg" />
+              <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-brand-gold mb-1">Calcuta FP</p>
+              <h2 className="text-3xl font-black text-white leading-tight">Mundial 2026</h2>
+              <p className="text-sm text-white/60 mt-2">La quiniela de los campeones</p>
+            </div>
+          </div>
+          {/* Strip de miniaturas con carrusel */}
+          <div className="h-20 flex overflow-hidden">
+            <PlayerCarousel className="w-full h-full" overlay="none" interval={3000} />
           </div>
         </div>
 

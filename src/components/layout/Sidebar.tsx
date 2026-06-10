@@ -24,27 +24,24 @@ export default function Sidebar() {
   return (
     <aside className="flex h-full w-56 flex-col bg-brand-navy text-white shrink-0">
 
-      {/* Logo + nombre */}
-      <div className="flex items-center gap-3 border-b border-white/10 px-4 py-4">
-        <div className="h-10 w-10 shrink-0 rounded-lg overflow-hidden bg-white flex items-center justify-center">
-          {/* Usa logo.png — reemplaza con la imagen real en /public/logo.png */}
-          <img
-            src="/logo.png"
-            alt="Calcuta FP"
-            className="h-9 w-9 object-contain"
-            onError={(e) => {
-              // Fallback: mostrar SVG con letras FP
-              (e.target as HTMLImageElement).src = '/logo.svg'
-            }}
-          />
-        </div>
-        <div>
-          <p className="text-xs font-black tracking-wide text-white leading-tight">
-            Calcuta FP
-          </p>
-          <p className="text-[10px] text-brand-gold font-semibold tracking-widest uppercase leading-tight">
-            Mundial 2026
-          </p>
+      {/* Hero foto grupal + logo */}
+      <div className="relative border-b border-white/10 overflow-hidden" style={{ height: '110px' }}>
+        {/* Foto grupal de fondo */}
+        <img src="/hero.jpg" alt="" className="absolute inset-0 h-full w-full object-cover object-top opacity-40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-navy/30 to-brand-navy/90" />
+        {/* Logo + texto */}
+        <div className="relative z-10 flex items-center gap-3 px-4 py-4">
+          <div className="h-12 w-12 shrink-0 rounded-xl overflow-hidden bg-white/95 flex items-center justify-center shadow-lg">
+            <img
+              src="/logo.svg"
+              alt="FP"
+              className="h-11 w-11 object-contain"
+            />
+          </div>
+          <div>
+            <p className="text-sm font-black tracking-wide text-white leading-tight">Calcuta FP</p>
+            <p className="text-[10px] text-brand-gold font-semibold tracking-widest uppercase leading-tight">Mundial 2026</p>
+          </div>
         </div>
       </div>
 

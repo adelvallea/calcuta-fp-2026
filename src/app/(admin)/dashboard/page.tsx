@@ -85,9 +85,9 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-0">
-      {/* Banner con imagen de fondo */}
+      {/* Banner con foto grupal hero */}
       <div className="relative h-40 overflow-hidden bg-brand-navy"
-        style={{ backgroundImage: 'url(/players/player-3.jpg)', backgroundSize: 'cover', backgroundPosition: 'center top' }}>
+        style={{ backgroundImage: 'url(/hero.jpg)', backgroundSize: 'cover', backgroundPosition: 'center 30%' }}>
         <div className="absolute inset-0 bg-gradient-to-t from-brand-navy via-brand-navy/60 to-brand-navy/20" />
         <div className="absolute inset-0 flex items-end justify-between px-6 pb-5 z-10">
           <div>

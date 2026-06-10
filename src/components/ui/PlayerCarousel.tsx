@@ -2,12 +2,25 @@
 
 import { useEffect, useState } from 'react'
 
-const PLAYERS = [
-  '/players/player-1.jpg',
-  '/players/player-2.jpg',
-  '/players/player-3.jpg',
-  '/players/player-4.jpg',
-  '/players/player-5.jpg',
+// Fotos secundarias para el carrusel (jugadores individuales)
+const CAROUSEL = [
+  '/players/p01.jpg',
+  '/players/p02.jpg',
+  '/players/p03.jpg',
+  '/players/p04.jpg',
+  '/players/p05.jpg',
+  '/players/p06.jpg',
+  '/players/p07.jpg',
+  '/players/p08.jpg',
+  '/players/p09.jpg',
+  '/players/p10.jpg',
+  '/players/p11.jpg',
+  '/players/p12.jpg',
+  '/players/p13.jpg',
+  '/players/p14.jpg',
+  '/players/p15.jpg',
+  '/players/p16.jpg',
+  '/players/p17.jpg',
 ]
 
 interface Props {
@@ -17,60 +30,36 @@ interface Props {
 }
 
 export default function PlayerCarousel({ className = '', overlay = 'dark', interval = 4000 }: Props) {
-  const [current, setCurrent] = useState(0)
-  const [prev, setPrev] = useState<number | null>(null)
-  const [fading, setFading] = useState(false)
+  const [idx, setIdx] = useState(0)
+  const [fade, setFade] = useState(false)
 
   useEffect(() => {
     const t = setInterval(() => {
-      setPrev(current)
-      setFading(true)
+      setFade(true)
       setTimeout(() => {
-        setCurrent(c => (c + 1) % PLAYERS.length)
-        setFading(false)
-        setPrev(null)
-      }, 700)
+        setIdx(i => (i + 1) % CAROUSEL.length)
+        setFade(false)
+      }, 600)
     }, interval)
     return () => clearInterval(t)
-  }, [current, interval])
+  }, [interval])
 
   const overlayClass =
-    overlay === 'dark'  ? 'bg-gradient-to-t from-black/80 via-black/40 to-black/20' :
-    overlay === 'light' ? 'bg-white/20 backdrop-blur-sm' : ''
+    overlay === 'dark'  ? 'bg-gradient-to-t from-black/80 via-black/40 to-transparent' :
+    overlay === 'light' ? 'bg-white/20' : ''
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      {/* Imagen previa (saliendo) */}
-      {prev !== null && (
-        <img
-          key={`prev-${prev}`}
-          src={PLAYERS[prev]}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-700 opacity-0"
-        />
-      )}
-
-      {/* Imagen actual */}
       <img
-        key={`curr-${current}`}
-        src={PLAYERS[current]}
+        key={idx}
+        src={CAROUSEL[idx]}
         alt=""
-        className={`absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-700 ${fading ? 'opacity-0' : 'opacity-100'}`}
+        className={`absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-600 ${fade ? 'opacity-0' : 'opacity-100'}`}
       />
-
-      {/* Overlay */}
-      {overlay !== 'none' && (
-        <div className={`absolute inset-0 ${overlayClass}`} />
-      )}
-
-      {/* Puntitos de navegación */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-        {PLAYERS.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className={`h-1.5 rounded-full transition-all ${i === current ? 'w-4 bg-white' : 'w-1.5 bg-white/40'}`}
-          />
+      {overlay !== 'none' && <div className={`absolute inset-0 ${overlayClass}`} />}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+        {[0,1,2,3,4].map(i => (
+          <span key={i} className={`h-1 rounded-full transition-all ${Math.floor(idx/3)===i ? 'w-3 bg-white' : 'w-1 bg-white/30'}`} />
         ))}
       </div>
     </div>
