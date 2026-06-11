@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { validateBidIncrement, formatCurrency } from '@/lib/calculations'
 import { parseProbs, getLotDisplayProbs, flagCode } from '@/lib/lot-utils'
+import { playBidSound, playSoldSound } from '@/lib/sounds'
+import AuctionTimer from './AuctionTimer'
 import type { Lot, Bid, Team } from '@/types'
 import toast from 'react-hot-toast'
 import {
   ChevronLeft, ChevronRight, Gavel, CheckCircle,
-  PauseCircle, Plus, Minus, Info
+  PauseCircle, Plus, Minus, Info, Tv2
 } from 'lucide-react'
 
 interface Props {
@@ -70,6 +72,7 @@ export default function LiveAuctionBoard({ initialLot, allLots, participants, se
     try {
       await supabase.from('bids').insert({ lot_id: lot.id, participant_id: selectedParticipant, amount: bidAmount, created_by: 'admin' })
       await supabase.from('lots').update({ current_bid: bidAmount, status: 'active' }).eq('id', lot.id)
+      playBidSound()
       const name = participants.find(p => p.id === selectedParticipant)?.name ?? ''
       toast.success(`Bid ${fmt(bidAmount)} — ${name}`)
     } catch (e: any) { toast.error(e.message) }
@@ -83,6 +86,7 @@ export default function LiveAuctionBoard({ initialLot, allLots, participants, se
     try {
       await supabase.from('lots').update({ status: 'sold', final_price: lot.current_bid }).eq('id', lot.id)
       if (winnerId) await supabase.from('lot_ownerships').upsert({ lot_id: lot.id, participant_id: winnerId, ownership_percentage: 100 })
+      playSoldSound()
       setSoldFlash(true)
       setTimeout(() => setSoldFlash(false), 2500)
       toast.success(`¡Vendido! ${fmt(lot.current_bid)}`)
@@ -367,8 +371,16 @@ export default function LiveAuctionBoard({ initialLot, allLots, participants, se
               </div>
             )}
 
+            {/* Timer */}
+            <AuctionTimer lotId={lot.id} isAdmin={true} onExpire={handleSell} />
+
             {/* Acciones del lote */}
             <div className="space-y-2">
+              {/* Botón proyección */}
+              <a href={`/auction/projection/${lot.id}`} target="_blank" rel="noopener noreferrer"
+                className="btn-secondary w-full justify-center text-xs">
+                <Tv2 className="h-3.5 w-3.5" /> Abrir pantalla de proyección
+              </a>
               {lot.status !== 'sold' && (
                 <button onClick={handleSell} disabled={loading || lot.current_bid === 0}
                   className="btn-gold w-full justify-center py-2.5">

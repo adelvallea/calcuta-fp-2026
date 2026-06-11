@@ -6,11 +6,12 @@ import { validateBidIncrement, formatCurrency, buildPoolSummary } from '@/lib/ca
 import { parseProbs, getLotDisplayProbs, flagCode } from '@/lib/lot-utils'
 import type { Participant, Lot, PrizeRule, Team, SponsorContribution } from '@/types'
 import toast from 'react-hot-toast'
-import { Gavel, Trophy, List, BookOpen, Plus, Minus, X } from 'lucide-react'
+import { Gavel, Trophy, List, BookOpen, Plus, Minus, User, Medal, Share2 } from 'lucide-react'
 import PlayerCarousel from '@/components/ui/PlayerCarousel'
+import AuctionTimer from '@/components/auction/AuctionTimer'
 
 interface RegisteredViewer { id: string; name: string }
-type Tab = 'live' | 'prizes' | 'lots' | 'rules'
+type Tab = 'live' | 'prizes' | 'lots' | 'rules' | 'me' | 'board'
 
 /* ── REGLAS ─────────────────────────────────────────────────────────────────── */
 function RulesContent() {
@@ -158,10 +159,12 @@ export default function PublicPage() {
   }
 
   const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
-    { key: 'live',   label: 'En vivo',  icon: <Gavel className="h-4 w-4" /> },
-    { key: 'prizes', label: 'FPremios', icon: <Trophy className="h-4 w-4" /> },
-    { key: 'lots',   label: 'Lotes',    icon: <List className="h-4 w-4" /> },
-    { key: 'rules',  label: 'Reglas',   icon: <BookOpen className="h-4 w-4" /> },
+    { key: 'live',   label: 'En vivo',    icon: <Gavel className="h-4 w-4" /> },
+    { key: 'prizes', label: 'FPremios',   icon: <Trophy className="h-4 w-4" /> },
+    { key: 'lots',   label: 'Lotes',      icon: <List className="h-4 w-4" /> },
+    { key: 'me',     label: 'Mi perfil',  icon: <User className="h-4 w-4" /> },
+    { key: 'board',  label: 'Ranking',    icon: <Medal className="h-4 w-4" /> },
+    { key: 'rules',  label: 'Reglas',     icon: <BookOpen className="h-4 w-4" /> },
   ]
 
   // ── PANTALLA DE REGISTRO ──────────────────────────────────────────────────────
@@ -348,6 +351,11 @@ export default function PublicPage() {
                   {bidding ? 'Registrando...' : `Pujar ${fmt(bidAmount)}`}
                 </button>
 
+                {/* Timer (solo lectura para participantes) */}
+                <div className="mt-3">
+                  <AuctionTimer lotId={activeLot.id} isAdmin={false} />
+                </div>
+
                 {/* Historial */}
                 {activeLot.bids?.length > 0 && (
                   <div className="mt-3 space-y-1">
@@ -494,6 +502,177 @@ export default function PublicPage() {
               </div>
             </div>
             <RulesContent />
+          </div>
+        )}
+
+        {/* ── TAB: MI PERFIL ────────────────────────────────────────── */}
+        {tab === 'me' && (
+          <div className="max-w-lg mx-auto px-4 py-4 pb-8 space-y-4">
+            {/* Header */}
+            <div className="card bg-brand-navy text-white">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-full bg-brand-gold/20 flex items-center justify-center">
+                  <span className="text-xl font-black text-brand-gold">{viewer.name[0].toUpperCase()}</span>
+                </div>
+                <div>
+                  <p className="font-black text-white">{viewer.name}</p>
+                  <p className="text-xs text-white/50">FParticipante Calcuta FP 2026</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Mis lotes */}
+            {(() => {
+              const myLots = lots.filter((l: any) =>
+                l.ownerships?.some((o: any) => o.participant_id === viewer.id) && l.status === 'sold'
+              )
+              const myBids = myLots.reduce((s: number, l: any) => s + (l.final_price ?? 0), 0)
+              const totalDue = Math.max(settings?.buy_in_amount ?? 1000, myBids)
+              const meParticipant = participants.find(p => p.id === viewer.id)
+              const paid = meParticipant?.amount_paid ?? 0
+              const balance = totalDue - paid
+              const expectedPayout = pool?.prizes?.reduce((s: number, p: any) => {
+                const ownership = p.current_candidate?.ownerships?.find((o: any) => o.participant_id === viewer.id)
+                return s + (ownership ? (p.prize_amount * ownership.ownership_percentage / 100) : 0)
+              }, 0) ?? 0
+
+              return (
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="card text-center">
+                      <p className="text-2xl font-black text-brand-navy">{fmt(totalDue)}</p>
+                      <p className="text-[10px] text-gray-400 uppercase mt-0.5">Total a pagar</p>
+                    </div>
+                    <div className="card text-center">
+                      <p className={`text-2xl font-black ${balance > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        {balance > 0 ? fmt(balance) : '✓ Pagado'}
+                      </p>
+                      <p className="text-[10px] text-gray-400 uppercase mt-0.5">Saldo pendiente</p>
+                    </div>
+                    <div className="card text-center">
+                      <p className="text-2xl font-black text-brand-gold">{fmt(expectedPayout)}</p>
+                      <p className="text-[10px] text-gray-400 uppercase mt-0.5">Premio estimado</p>
+                    </div>
+                    <div className="card text-center">
+                      <p className={`text-2xl font-black ${expectedPayout - totalDue >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                        {fmt(expectedPayout - totalDue)}
+                      </p>
+                      <p className="text-[10px] text-gray-400 uppercase mt-0.5">Utilidad neta</p>
+                    </div>
+                  </div>
+
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-brand-slate">
+                    Mis lotes ({myLots.length})
+                  </h3>
+                  {myLots.length === 0 ? (
+                    <div className="card text-center py-6 text-sm text-gray-400">
+                      Aún no tienes lotes. ¡Participa en la subasta!
+                    </div>
+                  ) : myLots.map((lot: any) => {
+                    const d = getLotDisplayProbs(lot.number, parseProbs(lot.notes))
+                    const canShare = typeof navigator !== 'undefined' && 'share' in navigator
+                    return (
+                      <div key={lot.id} className="card">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <p className="text-sm font-bold text-brand-navy">{lot.title}</p>
+                            <p className="text-[10px] text-gray-400 mt-0.5">
+                              {lot.teams?.map((t: any) => t.name).join(' · ')}
+                            </p>
+                            <div className="flex items-center gap-3 mt-2">
+                              <span className="text-xs font-bold text-green-700">{fmt(lot.final_price ?? 0)}</span>
+                              <span className={`text-xs font-bold ${d.show === 'champion' ? 'text-brand-gold-dark' : 'text-blue-600'}`}>
+                                {d.value.toFixed(1)}% {d.label.split(' ').slice(1).join(' ')}
+                              </span>
+                            </div>
+                          </div>
+                          {canShare && (
+                            <button onClick={() => navigator.share({
+                              title: `Mi lote: ${lot.title}`,
+                              text: `Tengo el ${lot.title} en la Calcuta FP 2026. Pagué ${fmt(lot.final_price ?? 0)} con ${d.value.toFixed(1)}% de prob. de ${d.label}!`,
+                              url: window.location.href,
+                            }).catch(() => {})}
+                              className="rounded-lg bg-gray-100 p-2 hover:bg-green-100 transition shrink-0">
+                              <Share2 className="h-4 w-4 text-gray-500" />
+                            </button>
+                          )}
+                        </div>
+                        {/* Equipos con banderas */}
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {lot.teams?.map((t: any) => (
+                            <div key={t.id} className="flex items-center gap-1 rounded-md bg-brand-bg px-2 py-1">
+                              <img src={`https://flagcdn.com/w40/${flagCode(t.country_code)}.png`}
+                                className="h-3 w-4 rounded object-cover" alt={t.name}
+                                onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                              <span className="text-[10px] font-medium text-brand-navy">{t.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </>
+              )
+            })()}
+          </div>
+        )}
+
+        {/* ── TAB: RANKING ─────────────────────────────────────────── */}
+        {tab === 'board' && (
+          <div className="max-w-lg mx-auto px-4 py-4 pb-8 space-y-3">
+            {/* Banner */}
+            <div className="relative h-24 rounded-2xl overflow-hidden">
+              <img src="/hero.jpg" alt="" className="absolute inset-0 h-full w-full object-cover object-center" />
+              <div className="absolute inset-0 bg-brand-navy/70" />
+              <div className="relative z-10 h-full flex items-center justify-center gap-2">
+                <Medal className="h-6 w-6 text-brand-gold" />
+                <p className="text-lg font-black text-white">Ranking de la Calcuta</p>
+              </div>
+            </div>
+
+            {/* Lista de participantes ordenados por payout esperado */}
+            {(() => {
+              const ranking = participants.map(p => {
+                const myLots = lots.filter((l: any) =>
+                  l.ownerships?.some((o: any) => o.participant_id === p.id) && l.status === 'sold'
+                )
+                const myBids = myLots.reduce((s: number, l: any) => s + (l.final_price ?? 0), 0)
+                const totalDue = Math.max(p.buy_in_amount, myBids)
+                const expectedPayout = pool?.prizes?.reduce((s: number, pr: any) => {
+                  const ownership = pr.current_candidate?.ownerships?.find((o: any) => o.participant_id === p.id)
+                  return s + (ownership ? (pr.prize_amount * ownership.ownership_percentage / 100) : 0)
+                }, 0) ?? 0
+                return { ...p, totalDue, expectedPayout, net: expectedPayout - totalDue, lotsCount: myLots.length }
+              }).sort((a, b) => b.expectedPayout - a.expectedPayout)
+
+              return ranking.map((p, i) => {
+                const isMe = p.id === viewer.id
+                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`
+                return (
+                  <div key={p.id} className={`rounded-xl border px-4 py-3 flex items-center gap-3 ${isMe ? 'border-brand-gold bg-amber-50' : 'border-gray-100 bg-white'}`}>
+                    <span className="text-xl w-8 text-center shrink-0">{medal}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-bold truncate ${isMe ? 'text-brand-gold-dark' : 'text-brand-navy'}`}>
+                        {p.name} {isMe && <span className="text-[9px] bg-brand-gold text-white rounded px-1 ml-1">Tú</span>}
+                      </p>
+                      <p className="text-[10px] text-gray-400">{p.lotsCount} lote{p.lotsCount !== 1 ? 's' : ''} · Invertido: {fmt(p.totalDue)}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-black text-brand-gold">{fmt(p.expectedPayout)}</p>
+                      <p className={`text-[10px] font-bold ${p.net >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                        {p.net >= 0 ? '+' : ''}{fmt(p.net)}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })
+            })()}
+
+            {participants.length === 0 && (
+              <div className="card text-center py-8 text-sm text-gray-400">
+                Sin FParticipantes registrados aún
+              </div>
+            )}
           </div>
         )}
 
