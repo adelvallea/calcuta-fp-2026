@@ -199,9 +199,9 @@ export default function PublicPage() {
             <p className="text-[10px] text-gray-400 text-center mt-4">
               Si ya eres participante usa exactamente el mismo nombre.
             </p>
-            {/* Strip de jugadores */}
-            <div className="mt-6 rounded-xl overflow-hidden h-16">
-              <PlayerCarousel className="h-full w-full" overlay="none" interval={3000} />
+            {/* Grid de jugadores — fotos completas */}
+            <div className="mt-6 rounded-xl overflow-hidden h-36">
+              <PlayerCarousel className="h-full w-full" fit="contain" bgColor="#0a1628" interval={3000} />
             </div>
           </div>
         </div>
@@ -237,9 +237,9 @@ export default function PublicPage() {
         </div>
       </header>
 
-      {/* Strip de jugadores */}
-      <div className="h-14 overflow-hidden shrink-0">
-        <PlayerCarousel className="h-full w-full" overlay="none" interval={2500} />
+      {/* Foto jugador — contenida sin recorte */}
+      <div className="h-36 overflow-hidden shrink-0 bg-brand-navy">
+        <PlayerCarousel className="h-full w-full" fit="contain" bgColor="#0a1628" interval={3000} />
       </div>
 
       {/* Tabs de navegación */}
@@ -391,8 +391,8 @@ export default function PublicPage() {
         {tab === 'prizes' && (
           <div className="max-w-lg mx-auto px-4 py-4 space-y-3 pb-8">
             {/* Banner */}
-            <div className="relative h-28 rounded-2xl overflow-hidden">
-              <PlayerCarousel className="h-full w-full" overlay="dark" interval={4000} />
+            <div className="relative h-36 rounded-2xl overflow-hidden bg-brand-navy">
+              <PlayerCarousel className="h-full w-full" fit="contain" bgColor="#0a1628" interval={4000} />
               <div className="absolute inset-0 flex items-center justify-center gap-3 z-10">
                 <img src="/logo.png" alt="FP" className="h-10 w-10"
                   onError={(e) => { (e.target as HTMLImageElement).src = '/logo.svg' }} />
