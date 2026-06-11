@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Gavel, Users, List,
-  CreditCard, Trophy, Globe, Settings, Eye,
+  CreditCard, Trophy, Globe, Settings, Eye, LogOut,
 } from 'lucide-react'
 
 const nav = [
@@ -67,16 +67,22 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Vista pública */}
-      <div className="border-t border-white/10 px-2 py-3">
-        <Link
-          href="/public"
-          target="_blank"
-          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/50 transition-all hover:bg-white/10 hover:text-white"
-        >
+      {/* Vista pública + Logout */}
+      <div className="border-t border-white/10 px-2 py-3 space-y-0.5">
+        <Link href="/public" target="_blank"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/50 hover:bg-white/10 hover:text-white transition-all">
           <Eye className="h-4 w-4" />
           Vista pública
         </Link>
+        <button
+          onClick={async () => {
+            await fetch('/api/auth/logout', { method: 'POST' })
+            window.location.href = '/login'
+          }}
+          className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/30 hover:bg-white/10 hover:text-white/70 transition-all">
+          <LogOut className="h-4 w-4" />
+          Cerrar sesión
+        </button>
       </div>
     </aside>
   )
