@@ -725,77 +725,94 @@ export default function PublicPage() {
 
         {/* ── TAB: RANKING ─────────────────────────────────────────── */}
         {tab === 'board' && (
-          <div className="max-w-lg mx-auto px-4 py-4 pb-8 space-y-3">
+          <div className="max-w-lg mx-auto px-4 py-4 pb-8 space-y-2">
             {/* Banner */}
-            <div className="relative h-24 rounded-2xl overflow-hidden">
+            <div className="relative h-20 rounded-2xl overflow-hidden mb-1">
               <img src="/hero.jpg" alt="" className="absolute inset-0 h-full w-full object-cover object-center" />
               <div className="absolute inset-0 bg-brand-navy/70" />
               <div className="relative z-10 h-full flex items-center justify-center gap-2">
-                <Medal className="h-6 w-6 text-brand-gold" />
-                <p className="text-lg font-black text-white">Ranking FIFA — Lotes</p>
+                <Medal className="h-5 w-5 text-brand-gold" />
+                <p className="text-base font-black text-white">48 Equipos · Ranking FIFA</p>
               </div>
             </div>
 
             {/* Aviso */}
-            <div className="rounded-xl bg-blue-50 border border-blue-100 px-4 py-3 text-xs text-blue-700">
-              <p className="font-semibold mb-0.5">📊 Ranking por posición FIFA actual</p>
-              <p className="text-blue-500">Las posiciones se actualizarán automáticamente conforme avancen los resultados del Mundial 2026.</p>
+            <div className="rounded-xl bg-blue-50 border border-blue-100 px-3 py-2 text-xs text-blue-600 mb-1">
+              Las posiciones se actualizarán conforme avancen los resultados del Mundial 2026.
             </div>
 
-            {/* Lotes ordenados por mejor equipo (menor ranking FIFA = mejor) */}
-            {(() => {
-              const lotsWithRank = lots.map((lot: any) => {
-                const bestRank = lot.teams?.length > 0
-                  ? Math.min(...lot.teams.map((t: any) => t.fifa_rank ?? 999))
-                  : 999
-                const owners = lot.ownerships?.map((o: any) => o.participant?.name).filter(Boolean) ?? []
-                const isMyLot = lot.ownerships?.some((o: any) => o.participant_id === viewer.id)
-                return { ...lot, bestRank, owners, isMyLot }
-              }).sort((a: any, b: any) => a.bestRank - b.bestRank)
+            {/* 48 equipos ordenados por ranking FIFA */}
+            {[...teams]
+              .sort((a, b) => (a.fifa_rank ?? 999) - (b.fifa_rank ?? 999))
+              .map((team, i) => {
+                // Buscar el lote al que pertenece este equipo
+                const ownerLot = lots.find((l: any) =>
+                  l.teams?.some((t: any) => t.id === team.id)
+                )
+                const owners = ownerLot?.ownerships
+                  ?.map((o: any) => o.participant?.name).filter(Boolean) ?? []
+                const isMyTeam = ownerLot?.ownerships
+                  ?.some((o: any) => o.participant_id === viewer.id)
 
-              return lotsWithRank.map((lot: any, i: number) => {
-                const d = getLotDisplayProbs(lot.number, parseProbs(lot.notes))
-                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`
+                const STATUS_ICON: Record<string, string> = {
+                  champion: '🏆', runner_up: '🥈', third_place: '🥉',
+                  semifinal: '4️⃣', quarterfinal: '8️⃣', round_of_16: '🔟',
+                  round_of_32: '3️⃣2️⃣', group_stage: '⚽', eliminated: '❌', not_started: '',
+                }
+
                 return (
-                  <div key={lot.id} className={`rounded-xl border px-4 py-3 ${lot.isMyLot ? 'border-brand-gold bg-amber-50' : 'border-gray-100 bg-white'}`}>
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg w-7 text-center shrink-0">{medal}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className={`text-sm font-bold truncate ${lot.isMyLot ? 'text-brand-gold-dark' : 'text-brand-navy'}`}>
-                            {lot.title}
-                          </p>
-                          {lot.isMyLot && <span className="text-[9px] bg-brand-gold text-white rounded px-1.5 py-0.5 shrink-0">Tu lote</span>}
-                        </div>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {lot.teams?.map((t: any) => (
-                            <span key={t.id} className="text-[9px] bg-gray-100 text-gray-600 rounded px-1.5 py-0.5">
-                              {t.name} #{t.fifa_rank}
-                            </span>
-                          ))}
-                        </div>
-                        {lot.owners.length > 0 && (
-                          <p className="text-[10px] text-gray-400 mt-1">👤 {lot.owners.join(', ')}</p>
-                        )}
-                      </div>
-                      <div className="text-right shrink-0">
-                        <p className={`text-xs font-bold ${d.show === 'champion' ? 'text-brand-gold-dark' : 'text-blue-600'}`}>
-                          {d.value.toFixed(1)}%
+                  <div key={team.id}
+                    className={`rounded-xl border flex items-center gap-2.5 px-3 py-2.5 ${
+                      isMyTeam ? 'border-brand-gold bg-amber-50' : 'border-gray-100 bg-white'
+                    }`}>
+                    {/* Posición */}
+                    <span className="text-xs font-bold text-gray-400 w-6 text-right shrink-0">
+                      {i + 1}
+                    </span>
+
+                    {/* Bandera */}
+                    <div className="h-7 w-11 rounded overflow-hidden bg-gray-100 shrink-0">
+                      <img
+                        src={`https://flagcdn.com/w80/${flagCode(team.country_code)}.png`}
+                        alt={team.name}
+                        className="h-full w-full object-cover"
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                      />
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className={`text-sm font-bold truncate ${isMyTeam ? 'text-brand-gold-dark' : 'text-brand-navy'}`}>
+                          {team.name}
                         </p>
-                        <p className="text-[9px] text-gray-400">{d.label.split(' ').slice(1).join(' ')}</p>
-                        {lot.status === 'sold' && (
-                          <p className="text-[10px] font-bold text-green-700 mt-0.5">{fmt(lot.final_price ?? 0)}</p>
+                        {isMyTeam && (
+                          <span className="text-[8px] bg-brand-gold text-white rounded px-1 py-0.5 shrink-0">
+                            Tu lote
+                          </span>
+                        )}
+                        {team.current_status !== 'not_started' && STATUS_ICON[team.current_status] && (
+                          <span className="text-xs">{STATUS_ICON[team.current_status]}</span>
                         )}
                       </div>
+                      <p className="text-[10px] text-gray-400">
+                        {team.confederation}
+                        {owners.length > 0 && ` · 👤 ${owners.join(', ')}`}
+                      </p>
+                    </div>
+
+                    {/* Ranking FIFA */}
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-black text-brand-navy">#{team.fifa_rank}</p>
+                      <p className="text-[9px] text-gray-400">B{team.pot}</p>
                     </div>
                   </div>
                 )
-              })
-            })()}
+              })}
 
-            {participants.length === 0 && (
+            {teams.length === 0 && (
               <div className="card text-center py-8 text-sm text-gray-400">
-                Sin FParticipantes registrados aún
+                Cargando equipos...
               </div>
             )}
 
