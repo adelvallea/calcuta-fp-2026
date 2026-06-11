@@ -804,7 +804,7 @@ export default function PublicPage() {
                     {/* Ranking FIFA */}
                     <div className="text-right shrink-0">
                       <p className="text-sm font-black text-brand-navy">#{team.fifa_rank}</p>
-                      <p className="text-[9px] text-gray-400">B{team.pot}</p>
+                      <p className="text-[9px] text-gray-400">Bombo {team.pot}</p>
                     </div>
                   </div>
                 )

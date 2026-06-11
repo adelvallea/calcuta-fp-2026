@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 const CAROUSEL = [
-  '/players/p01.jpg', '/players/p02.jpg', '/players/p03.jpg', '/players/p04.jpg',
+  '/players/p01.jpg', '/players/p02.jpg', '/players/p04.jpg',
   '/players/p05.jpg', '/players/p06.jpg', '/players/p07.jpg', '/players/p08.jpg',
   '/players/p09.jpg', '/players/p10.jpg', '/players/p11.jpg', '/players/p12.jpg',
   '/players/p13.jpg', '/players/p14.jpg', '/players/p15.jpg', '/players/p16.jpg',
