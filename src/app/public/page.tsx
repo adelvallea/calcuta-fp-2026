@@ -799,23 +799,6 @@ export default function PublicPage() {
               </div>
             )}
 
-            {/* Placeholder oculto para mantener estructura */ }
-            {false && (
-              <div key="placeholder" className="hidden">
-                <span></span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold truncate text-brand-navy"></p>
-                  <p className="text-[10px] text-gray-400"></p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-sm font-black text-brand-gold"></p>
-                  <p className="text-[10px] font-bold text-green-600"></p>
-                    </div>
-                  </div>
-                )
-              })
-            })()}
-
           </div>
         )}
 
