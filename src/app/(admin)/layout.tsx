@@ -11,7 +11,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex items-center justify-end gap-3 border-b border-gray-100 bg-white px-6 py-2 shrink-0">
           <RulesButton />
         </div>
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto md:pt-0">
           {children}
         </main>
       </div>

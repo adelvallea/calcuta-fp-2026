@@ -65,6 +65,156 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
+/* ── LISTA Y MODAL DE LOTES ─────────────────────────────────────────────────── */
+function LotsList({ lots, fmt, viewerId }: { lots: any[]; fmt: (n: number) => string; viewerId: string }) {
+  const [selected, setSelected] = useState<any | null>(null)
+
+  return (
+    <div className="max-w-lg mx-auto px-4 py-4 space-y-2 pb-8">
+      <p className="text-[10px] text-gray-400 mb-3">Toca un lote para ver los detalles del equipo</p>
+
+      {lots.map((lot: any) => {
+        const d = getLotDisplayProbs(lot.number, parseProbs(lot.notes))
+        const owners = lot.ownerships?.map((o: any) => o.participant?.name).filter(Boolean) ?? []
+        const isMyLot = lot.ownerships?.some((o: any) => o.participant_id === viewerId)
+        return (
+          <button key={lot.id} onClick={() => setSelected(lot)}
+            className={`w-full text-left rounded-xl bg-white border px-4 py-3 hover:shadow-md active:scale-[0.99] transition-all ${
+              isMyLot ? 'border-brand-gold ring-1 ring-brand-gold/30' :
+              lot.status === 'sold' ? 'border-green-200' :
+              lot.status === 'active' ? 'border-blue-300' : 'border-gray-100'}`}>
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] font-mono font-bold text-brand-gold">#{lot.number}</span>
+                  <span className={lot.status === 'sold' ? 'badge-sold' : lot.status === 'active' ? 'badge-active' : 'badge-pending'}>
+                    {lot.status === 'sold' ? 'Vendido' : lot.status === 'active' ? 'En subasta' : 'Pendiente'}
+                  </span>
+                  {isMyLot && <span className="text-[9px] bg-brand-gold text-white rounded px-1.5 py-0.5">Tu lote</span>}
+                </div>
+                <p className="text-sm font-semibold text-brand-navy mt-0.5 leading-tight">{lot.title}</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">{lot.teams?.map((t: any) => t.name).join(' · ')}</p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className={`text-xs font-bold ${d.show === 'champion' ? 'text-brand-gold-dark' : d.show === 'pos32' ? 'text-blue-600' : 'text-red-600'}`}>
+                  {d.value.toFixed(1)}%
+                </p>
+                <p className="text-[9px] text-gray-400">{d.label.split(' ').slice(1).join(' ')}</p>
+                <p className="text-[9px] text-gray-300 mt-0.5">Ver detalles →</p>
+              </div>
+            </div>
+            {lot.status === 'sold' && (
+              <div className="mt-2 flex items-center justify-between">
+                <p className="text-[10px] text-gray-500">{owners.join(', ')}</p>
+                <p className="text-xs font-bold text-green-700">{fmt(lot.final_price ?? 0)}</p>
+              </div>
+            )}
+          </button>
+        )
+      })}
+
+      {/* Modal de detalle */}
+      {selected && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 px-0 sm:px-4"
+          onClick={() => setSelected(null)}>
+          <div className="bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl max-h-[90vh] overflow-y-auto"
+            onClick={e => e.stopPropagation()}>
+
+            {/* Handle para arrastrar en móvil */}
+            <div className="flex justify-center pt-3 pb-1 sm:hidden">
+              <div className="h-1 w-10 rounded-full bg-gray-300" />
+            </div>
+
+            {/* Header */}
+            <div className="flex items-start justify-between px-5 pt-4 pb-3 border-b border-gray-100">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-mono font-bold text-brand-gold">Lote #{selected.number}</span>
+                  <span className={selected.status === 'sold' ? 'badge-sold' : selected.status === 'active' ? 'badge-active' : 'badge-pending'}>
+                    {selected.status === 'sold' ? 'Vendido' : selected.status === 'active' ? 'En subasta' : 'Pendiente'}
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-brand-navy leading-tight">{selected.title}</h3>
+              </div>
+              <button onClick={() => setSelected(null)}
+                className="rounded-xl bg-gray-100 p-2 hover:bg-gray-200 transition shrink-0 ml-2">
+                <span className="text-lg leading-none">✕</span>
+              </button>
+            </div>
+
+            <div className="px-5 py-4 space-y-5">
+              {/* Probabilidad */}
+              {(() => {
+                const d = getLotDisplayProbs(selected.number, parseProbs(selected.notes))
+                return (
+                  <div className={`rounded-xl p-4 text-center ${d.show === 'champion' ? 'bg-amber-50' : d.show === 'pos32' ? 'bg-blue-50' : 'bg-red-50'}`}>
+                    <p className="text-xs text-gray-500 mb-1">{d.label}</p>
+                    <p className={`text-4xl font-black ${d.show === 'champion' ? 'text-brand-gold-dark' : d.show === 'pos32' ? 'text-blue-700' : 'text-red-600'}`}>
+                      {d.value.toFixed(1)}%
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">{d.prize}</p>
+                  </div>
+                )
+              })()}
+
+              {/* Equipos con detalles */}
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-brand-slate mb-3">Equipos del lote</p>
+                <div className="space-y-3">
+                  {selected.teams?.map((team: any) => (
+                    <div key={team.id} className="rounded-xl bg-brand-bg p-3">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="h-10 w-16 rounded-lg overflow-hidden bg-white shrink-0">
+                          <img src={`https://flagcdn.com/w160/${flagCode(team.country_code)}.png`}
+                            alt={team.name} className="h-full w-full object-cover"
+                            onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-brand-navy">{team.name}</p>
+                          <p className="text-xs text-gray-400">{team.confederation}</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-lg bg-white px-3 py-2">
+                          <p className="text-[9px] text-gray-400 uppercase">Ranking FIFA</p>
+                          <p className="text-sm font-black text-brand-navy">#{team.fifa_rank}</p>
+                        </div>
+                        <div className="rounded-lg bg-white px-3 py-2">
+                          <p className="text-[9px] text-gray-400 uppercase">Bombo</p>
+                          <p className="text-sm font-black text-brand-navy">Bombo {team.pot}</p>
+                        </div>
+                        <div className="rounded-lg bg-white px-3 py-2 col-span-2">
+                          <p className="text-[9px] text-gray-400 uppercase">Mejor Mundial</p>
+                          <p className="text-sm font-semibold text-brand-navy">{team.best_world_cup}</p>
+                        </div>
+                        <div className="rounded-lg bg-white px-3 py-2 col-span-2">
+                          <p className="text-[9px] text-gray-400 uppercase">Qatar 2022</p>
+                          <p className="text-sm font-semibold text-brand-navy">{team.world_cup_2022}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Dueño si está vendido */}
+              {selected.status === 'sold' && (
+                <div className="rounded-xl bg-green-50 border border-green-200 px-4 py-3">
+                  <p className="text-xs text-gray-500 mb-1">Dueño</p>
+                  <p className="font-bold text-green-700">
+                    {selected.ownerships?.map((o: any) => o.participant?.name).filter(Boolean).join(', ') || '—'}
+                  </p>
+                  <p className="text-xs text-green-600 mt-0.5">Comprado por {fmt(selected.final_price ?? 0)}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ── PÁGINA PRINCIPAL ────────────────────────────────────────────────────────── */
 export default function PublicPage() {
   const supabase = createClient()
@@ -439,51 +589,7 @@ export default function PublicPage() {
         )}
 
         {/* ── TAB: LOTES ───────────────────────────────────────────────────── */}
-        {tab === 'lots' && (
-          <div className="max-w-lg mx-auto px-4 py-4 space-y-2 pb-8">
-            <div className="flex gap-2 text-xs mb-3">
-              <span className="badge-sold">Vendido</span>
-              <span className="badge-active">En subasta</span>
-              <span className="badge-pending">Pendiente</span>
-            </div>
-            {lots.map((lot: any) => {
-              const d = getLotDisplayProbs(lot.number, parseProbs(lot.notes))
-              const owners = lot.ownerships?.map((o: any) => o.participant?.name).filter(Boolean) ?? []
-              return (
-                <div key={lot.id} className={`rounded-xl bg-white border px-4 py-3 ${
-                  lot.status === 'sold' ? 'border-green-200' :
-                  lot.status === 'active' ? 'border-brand-gold' : 'border-gray-100'}`}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] font-mono font-bold text-brand-gold">#{lot.number}</span>
-                        <span className={lot.status === 'sold' ? 'badge-sold' : lot.status === 'active' ? 'badge-active' : 'badge-pending'}>
-                          {lot.status === 'sold' ? 'Vendido' : lot.status === 'active' ? 'En subasta' : 'Pendiente'}
-                        </span>
-                      </div>
-                      <p className="text-sm font-semibold text-brand-navy mt-0.5 leading-tight">{lot.title}</p>
-                      <p className="text-[10px] text-gray-400 mt-0.5">
-                        {lot.teams?.map((t: any) => t.name).join(' · ')}
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className={`text-xs font-bold ${d.show === 'champion' ? 'text-brand-gold-dark' : d.show === 'pos32' ? 'text-blue-600' : 'text-red-600'}`}>
-                        {d.value.toFixed(1)}%
-                      </p>
-                      <p className="text-[9px] text-gray-400">{d.label.split(' ').slice(1).join(' ')}</p>
-                    </div>
-                  </div>
-                  {lot.status === 'sold' && (
-                    <div className="mt-2 flex items-center justify-between">
-                      <p className="text-[10px] text-gray-500">{owners.join(', ')}</p>
-                      <p className="text-xs font-bold text-green-700">{fmt(lot.final_price ?? 0)}</p>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )}
+        {tab === 'lots' && <LotsList lots={lots} fmt={fmt} viewerId={viewer.id} />}
 
         {/* ── TAB: REGLAS ──────────────────────────────────────────────────── */}
         {tab === 'rules' && (
@@ -549,11 +655,11 @@ export default function PublicPage() {
                       </p>
                       <p className="text-[10px] text-gray-400 uppercase mt-0.5">Saldo pendiente</p>
                     </div>
-                    <div className="card text-center">
-                      <p className="text-2xl font-black text-brand-gold">{fmt(expectedPayout)}</p>
-                      <p className="text-[10px] text-gray-400 uppercase mt-0.5">Premio estimado</p>
+                    <div className="card text-center col-span-2">
+                      <p className="text-2xl font-black text-brand-navy">{myLots.length}</p>
+                      <p className="text-[10px] text-gray-400 uppercase mt-0.5">Lotes comprados</p>
                     </div>
-                    <div className="card text-center">
+                    <div className="hidden card text-center">
                       <p className={`text-2xl font-black ${expectedPayout - totalDue >= 0 ? 'text-green-600' : 'text-red-500'}`}>
                         {fmt(expectedPayout - totalDue)}
                       </p>
@@ -626,42 +732,61 @@ export default function PublicPage() {
               <div className="absolute inset-0 bg-brand-navy/70" />
               <div className="relative z-10 h-full flex items-center justify-center gap-2">
                 <Medal className="h-6 w-6 text-brand-gold" />
-                <p className="text-lg font-black text-white">Ranking de la Calcuta</p>
+                <p className="text-lg font-black text-white">Ranking FIFA — Lotes</p>
               </div>
             </div>
 
-            {/* Lista de participantes ordenados por payout esperado */}
-            {(() => {
-              const ranking = participants.map(p => {
-                const myLots = lots.filter((l: any) =>
-                  l.ownerships?.some((o: any) => o.participant_id === p.id) && l.status === 'sold'
-                )
-                const myBids = myLots.reduce((s: number, l: any) => s + (l.final_price ?? 0), 0)
-                const totalDue = Math.max(p.buy_in_amount, myBids)
-                const expectedPayout = pool?.prizes?.reduce((s: number, pr: any) => {
-                  const ownership = pr.current_candidate?.ownerships?.find((o: any) => o.participant_id === p.id)
-                  return s + (ownership ? (pr.prize_amount * ownership.ownership_percentage / 100) : 0)
-                }, 0) ?? 0
-                return { ...p, totalDue, expectedPayout, net: expectedPayout - totalDue, lotsCount: myLots.length }
-              }).sort((a, b) => b.expectedPayout - a.expectedPayout)
+            {/* Aviso */}
+            <div className="rounded-xl bg-blue-50 border border-blue-100 px-4 py-3 text-xs text-blue-700">
+              <p className="font-semibold mb-0.5">📊 Ranking por posición FIFA actual</p>
+              <p className="text-blue-500">Las posiciones se actualizarán automáticamente conforme avancen los resultados del Mundial 2026.</p>
+            </div>
 
-              return ranking.map((p, i) => {
-                const isMe = p.id === viewer.id
+            {/* Lotes ordenados por mejor equipo (menor ranking FIFA = mejor) */}
+            {(() => {
+              const lotsWithRank = lots.map((lot: any) => {
+                const bestRank = lot.teams?.length > 0
+                  ? Math.min(...lot.teams.map((t: any) => t.fifa_rank ?? 999))
+                  : 999
+                const owners = lot.ownerships?.map((o: any) => o.participant?.name).filter(Boolean) ?? []
+                const isMyLot = lot.ownerships?.some((o: any) => o.participant_id === viewer.id)
+                return { ...lot, bestRank, owners, isMyLot }
+              }).sort((a: any, b: any) => a.bestRank - b.bestRank)
+
+              return lotsWithRank.map((lot: any, i: number) => {
+                const d = getLotDisplayProbs(lot.number, parseProbs(lot.notes))
                 const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`
                 return (
-                  <div key={p.id} className={`rounded-xl border px-4 py-3 flex items-center gap-3 ${isMe ? 'border-brand-gold bg-amber-50' : 'border-gray-100 bg-white'}`}>
-                    <span className="text-xl w-8 text-center shrink-0">{medal}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-bold truncate ${isMe ? 'text-brand-gold-dark' : 'text-brand-navy'}`}>
-                        {p.name} {isMe && <span className="text-[9px] bg-brand-gold text-white rounded px-1 ml-1">Tú</span>}
-                      </p>
-                      <p className="text-[10px] text-gray-400">{p.lotsCount} lote{p.lotsCount !== 1 ? 's' : ''} · Invertido: {fmt(p.totalDue)}</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-sm font-black text-brand-gold">{fmt(p.expectedPayout)}</p>
-                      <p className={`text-[10px] font-bold ${p.net >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                        {p.net >= 0 ? '+' : ''}{fmt(p.net)}
-                      </p>
+                  <div key={lot.id} className={`rounded-xl border px-4 py-3 ${lot.isMyLot ? 'border-brand-gold bg-amber-50' : 'border-gray-100 bg-white'}`}>
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg w-7 text-center shrink-0">{medal}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className={`text-sm font-bold truncate ${lot.isMyLot ? 'text-brand-gold-dark' : 'text-brand-navy'}`}>
+                            {lot.title}
+                          </p>
+                          {lot.isMyLot && <span className="text-[9px] bg-brand-gold text-white rounded px-1.5 py-0.5 shrink-0">Tu lote</span>}
+                        </div>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {lot.teams?.map((t: any) => (
+                            <span key={t.id} className="text-[9px] bg-gray-100 text-gray-600 rounded px-1.5 py-0.5">
+                              {t.name} #{t.fifa_rank}
+                            </span>
+                          ))}
+                        </div>
+                        {lot.owners.length > 0 && (
+                          <p className="text-[10px] text-gray-400 mt-1">👤 {lot.owners.join(', ')}</p>
+                        )}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className={`text-xs font-bold ${d.show === 'champion' ? 'text-brand-gold-dark' : 'text-blue-600'}`}>
+                          {d.value.toFixed(1)}%
+                        </p>
+                        <p className="text-[9px] text-gray-400">{d.label.split(' ').slice(1).join(' ')}</p>
+                        {lot.status === 'sold' && (
+                          <p className="text-[10px] font-bold text-green-700 mt-0.5">{fmt(lot.final_price ?? 0)}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )
@@ -673,6 +798,24 @@ export default function PublicPage() {
                 Sin FParticipantes registrados aún
               </div>
             )}
+
+            {/* Placeholder oculto para mantener estructura */ }
+            {false && (
+              <div key="placeholder" className="hidden">
+                <span></span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold truncate text-brand-navy"></p>
+                  <p className="text-[10px] text-gray-400"></p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-black text-brand-gold"></p>
+                  <p className="text-[10px] font-bold text-green-600"></p>
+                    </div>
+                  </div>
+                )
+              })
+            })()}
+
           </div>
         )}
 

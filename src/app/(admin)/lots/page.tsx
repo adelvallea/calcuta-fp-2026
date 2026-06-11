@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { parseProbs, getLotDisplayProbs, flagCode } from '@/lib/lot-utils'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
-import { Gavel, GripVertical, ChevronUp, ChevronDown } from 'lucide-react'
+import { Gavel, GripVertical, ChevronUp, ChevronDown, Scissors } from 'lucide-react'
 
 interface Team { id: string; name: string; country_code: string; fifa_rank: number; pot: number; best_world_cup: string; world_cup_2022: string }
 interface Lot {
@@ -24,6 +24,10 @@ export default function LotsPage() {
   const [fmt, setFmt] = useState<(n: number) => string>(() => (n: number) => `$${n.toLocaleString('es-MX')}`)
   const [reorderMode, setReorderMode] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [splitLot, setSplitLot] = useState<Lot | null>(null)
+  const [splitTeams, setSplitTeams] = useState<string[]>([])
+  const [splitGroup, setSplitGroup] = useState(false)
+  const [splitting, setSplitting] = useState(false)
 
   async function load() {
     const [{ data: lotsRaw }, { data: settings }] = await Promise.all([
@@ -76,6 +80,24 @@ export default function LotsPage() {
         setLots((prev) => prev.map((l, i) => ({ ...l, number: i + 1 })))
       } else toast.error('Error al guardar orden')
     } finally { setSaving(false) }
+  }
+
+  async function doSplit() {
+    if (!splitLot || splitTeams.length === 0) return toast.error('Selecciona al menos un equipo')
+    setSplitting(true)
+    try {
+      const res = await fetch('/api/lots/split', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sourceLotId: splitLot.id, teamIds: splitTeams, groupTeams: splitGroup }),
+      })
+      const d = await res.json()
+      if (res.ok) {
+        toast.success(`✅ ${d.created} lote${d.created !== 1 ? 's' : ''} creado${d.created !== 1 ? 's' : ''}`)
+        setSplitLot(null); setSplitTeams([]); setSplitGroup(false)
+        load()
+      } else toast.error(d.error ?? 'Error al crear lotes')
+    } finally { setSplitting(false) }
   }
 
   const totalSold = lots.filter(l => l.status === 'sold').reduce((s, l) => s + (l.final_price ?? 0), 0)
@@ -202,10 +224,84 @@ export default function LotsPage() {
                   <p className="text-xs text-blue-600">Bid actual: <strong>{fmt(lot.current_bid)}</strong></p>
                 </div>
               ) : null}
+
+              {/* Botón extraer equipo (solo combos pendientes con ≥2 equipos) */}
+              {isCombo && lot.status === 'pending' && lot.teams.length >= 2 && !reorderMode && (
+                <button onClick={() => { setSplitLot(lot); setSplitTeams([]) }}
+                  className="mt-2 w-full flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-orange-300 py-1.5 text-xs text-orange-600 hover:bg-orange-50 transition">
+                  <Scissors className="h-3.5 w-3.5" />
+                  Extraer equipo → crear nuevo lote
+                </button>
+              )}
             </div>
           )
         })}
       </div>
+
+      {/* ── MODAL SPLIT ─────────────────────────────────────────────── */}
+      {splitLot && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+          onClick={() => setSplitLot(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6"
+            onClick={e => e.stopPropagation()}>
+            <h3 className="font-bold text-brand-navy mb-1">
+              <Scissors className="inline h-4 w-4 mr-1 text-orange-500" />
+              Extraer equipo del Lote {splitLot.number}
+            </h3>
+            <p className="text-xs text-gray-400 mb-4">Selecciona qué equipos quieres sacar del combo y convertir en nuevo(s) lote(s).</p>
+
+            <div className="space-y-2 mb-4">
+              {splitLot.teams.map(t => (
+                <label key={t.id} className="flex items-center gap-3 rounded-xl border border-gray-100 px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition">
+                  <input type="checkbox"
+                    checked={splitTeams.includes(t.id)}
+                    onChange={e => setSplitTeams(prev =>
+                      e.target.checked ? [...prev, t.id] : prev.filter(id => id !== t.id)
+                    )}
+                    className="h-4 w-4 accent-orange-500 shrink-0" />
+                  <img src={`https://flagcdn.com/w40/${flagCode(t.country_code)}.png`}
+                    alt={t.name} className="h-4 w-6 rounded object-cover"
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                  <span className="text-sm font-semibold text-brand-navy">{t.name}</span>
+                  <span className="ml-auto text-xs text-gray-400">#{t.fifa_rank}</span>
+                </label>
+              ))}
+            </div>
+
+            {splitTeams.length > 1 && (
+              <label className="flex items-center gap-2 text-sm mb-4 cursor-pointer">
+                <input type="checkbox" checked={splitGroup} onChange={e => setSplitGroup(e.target.checked)}
+                  className="h-4 w-4 accent-brand-gold" />
+                <span className="text-gray-600">Agrupar equipos seleccionados en <strong>un solo lote combo</strong></span>
+              </label>
+            )}
+
+            {splitTeams.length > 0 && (
+              <div className="rounded-xl bg-orange-50 border border-orange-200 px-4 py-3 mb-4 text-xs text-orange-700">
+                <p className="font-semibold mb-1">Resultado:</p>
+                <p>• Lote {splitLot.number} quedará con: {splitLot.teams.filter(t => !splitTeams.includes(t.id)).map(t => t.name).join(' + ') || '(vacío)'}</p>
+                {splitGroup && splitTeams.length > 1
+                  ? <p>• Se creará 1 nuevo lote combo con: {splitLot.teams.filter(t => splitTeams.includes(t.id)).map(t => t.name).join(' + ')}</p>
+                  : splitTeams.map(id => {
+                    const t = splitLot.teams.find(tt => tt.id === id)
+                    return t ? <p key={id}>• Se creará 1 nuevo lote solo: {t.name}</p> : null
+                  })
+                }
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button onClick={doSplit} disabled={splitting || splitTeams.length === 0}
+                className="btn-primary flex-1 justify-center disabled:opacity-50">
+                {splitting ? 'Creando...' : 'Crear lote(s)'}
+              </button>
+              <button onClick={() => setSplitLot(null)} className="btn-secondary flex-1 justify-center">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
