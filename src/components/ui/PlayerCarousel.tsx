@@ -7,7 +7,8 @@ const CAROUSEL = [
   '/players/p05.jpg', '/players/p06.jpg', '/players/p07.jpg', '/players/p08.jpg',
   '/players/p09.jpg', '/players/p10.jpg', '/players/p11.jpg', '/players/p12.jpg',
   '/players/p13.jpg', '/players/p14.jpg', '/players/p15.jpg', '/players/p16.jpg',
-  '/players/p17.jpg',
+  '/players/p17.jpg', '/players/p18.jpg', '/players/p19.jpg', '/players/p20.jpg',
+  '/players/p21.jpg',
 ]
 
 interface Props {
