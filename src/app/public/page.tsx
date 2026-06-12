@@ -284,14 +284,10 @@ export default function PublicPage() {
     const { data: existing } = await supabase.from('participants').select('id, name').ilike('name', regForm.name.trim()).single()
     if (existing) {
       setViewer({ id: existing.id, name: existing.name })
-      toast.success(`¡Bienvenido ${existing.name}!`)
+      toast.success(`¡Bienvenido de vuelta, ${existing.name}!`)
     } else {
-      const { data: created, error } = await supabase.from('participants')
-        .insert({ name: regForm.name.trim(), buy_in_amount: settings?.buy_in_amount ?? 1000, amount_paid: 0 })
-        .select().single()
-      if (error) return toast.error(error.message)
-      setViewer({ id: created.id, name: created.name })
-      toast.success(`¡Registrado como ${created.name}!`)
+      // Registro cerrado — solo participantes existentes pueden entrar
+      toast.error('El registro está cerrado. Solo participantes registrados pueden entrar.')
     }
   }
 
@@ -337,8 +333,11 @@ export default function PublicPage() {
         {/* Formulario */}
         <div className="flex-1 flex items-center justify-center bg-white px-6 py-10">
           <div className="w-full max-w-sm">
-            <h1 className="text-2xl font-black text-brand-navy mb-1">¡Únete a la Calcuta!</h1>
-            <p className="text-sm text-gray-400 mb-6">Ingresa tu nombre para ver y pujar en tiempo real</p>
+            <h1 className="text-2xl font-black text-brand-navy mb-1">Bienvenido</h1>
+            <p className="text-sm text-gray-400 mb-1">Ingresa tu nombre para ver el avance en tiempo real</p>
+            <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700 mb-5">
+              🔒 Registro cerrado — solo participantes registrados
+            </div>
             <div className="space-y-4">
               <input value={regForm.name}
                 onChange={(e) => setRegForm({ name: e.target.value })}
@@ -346,7 +345,7 @@ export default function PublicPage() {
                 placeholder="Tu nombre completo"
                 className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm focus:border-brand-gold focus:outline-none transition-colors" />
               <button onClick={register} className="btn-gold w-full justify-center py-3.5 text-base rounded-xl">
-                Entrar
+                Entrar como participante
               </button>
             </div>
             <p className="text-[10px] text-gray-400 text-center mt-4">
@@ -391,9 +390,17 @@ export default function PublicPage() {
       </header>
 
       {/* Foto jugador — contenida sin recorte */}
-      <div className="h-36 overflow-hidden shrink-0 bg-brand-navy">
-        <PlayerCarousel className="h-full w-full" fit="contain" bgColor="#0a1628" interval={3000} />
+      <div className="h-20 overflow-hidden shrink-0">
+        <PlayerCarousel className="h-full w-full" overlay="none" interval={3000} />
       </div>
+
+      {/* Recordatorio de pago */}
+      {pool?.total_pending > 0 && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-center gap-2 text-xs text-amber-800 shrink-0">
+          <span>💰</span>
+          <p><strong>Recordatorio:</strong> liquida tu saldo con el moderador antes de que acabe el Mundial.</p>
+        </div>
+      )}
 
       {/* Tabs de navegación */}
       <div className="bg-white border-b border-gray-100 shrink-0 sticky top-0 z-20">

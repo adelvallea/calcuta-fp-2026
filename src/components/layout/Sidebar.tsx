@@ -3,13 +3,15 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { useIsAdmin } from '@/hooks/useIsAdmin'
 import {
   LayoutDashboard, Gavel, Users, List,
-  CreditCard, Trophy, Globe, Settings, Eye, LogOut, Menu, X
+  CreditCard, Trophy, Globe, Settings, Eye, LogOut, Menu, X, UserCircle, Lock,
 } from 'lucide-react'
 
 const nav = [
   { href: '/dashboard',    label: 'Dashboard',        icon: LayoutDashboard },
+  { href: '/mi-perfil',    label: 'Mi Perfil',        icon: UserCircle },
   { href: '/auction',      label: 'Subasta',           icon: Gavel },
   { href: '/participants', label: 'FParticipantes',    icon: Users },
   { href: '/lots',         label: 'Lotes',             icon: List },
@@ -22,6 +24,7 @@ const nav = [
 export default function Sidebar() {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const isAdmin = useIsAdmin()
 
   const NavContent = () => (
     <>
@@ -37,6 +40,10 @@ export default function Sidebar() {
           <div>
             <p className="text-sm font-black tracking-wide text-white leading-tight">Calcuta FP</p>
             <p className="text-[10px] text-brand-gold font-semibold tracking-widest uppercase leading-tight">Mundial 2026</p>
+            {isAdmin
+              ? <span className="text-[9px] bg-brand-gold/30 text-brand-gold rounded px-1.5 py-0.5 mt-1 inline-block">Moderador</span>
+              : <span className="text-[9px] bg-white/10 text-white/40 rounded px-1.5 py-0.5 mt-1 inline-block">Viewer</span>
+            }
           </div>
         </div>
       </div>
@@ -58,34 +65,40 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Vista pública + Logout */}
+      {/* Footer */}
       <div className="border-t border-white/10 px-2 py-3 space-y-0.5 shrink-0">
         <Link href="/public" target="_blank"
           className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/50 hover:bg-white/10 hover:text-white transition-all">
           <Eye className="h-4 w-4" />
           Vista pública
         </Link>
-        <button onClick={async () => {
-          await fetch('/api/auth/logout', { method: 'POST' })
-          window.location.href = '/login'
-        }} className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/30 hover:bg-white/10 hover:text-white/70 transition-all">
-          <LogOut className="h-4 w-4" />
-          Cerrar sesión
-        </button>
+        {isAdmin ? (
+          <button onClick={async () => {
+            await fetch('/api/auth/logout', { method: 'POST' })
+            window.location.reload()
+          }} className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/30 hover:bg-white/10 hover:text-white/70 transition-all">
+            <LogOut className="h-4 w-4" />
+            Cerrar sesión
+          </button>
+        ) : (
+          <Link href="/login" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/30 hover:bg-white/10 hover:text-white/70 transition-all">
+            <Lock className="h-4 w-4" />
+            Acceso moderador
+          </Link>
+        )}
       </div>
     </>
   )
 
   return (
     <>
-      {/* ── DESKTOP: sidebar fijo ───────────────────────────────────── */}
+      {/* DESKTOP */}
       <aside className="hidden md:flex h-full w-56 flex-col bg-brand-navy text-white shrink-0">
         <NavContent />
       </aside>
 
-      {/* ── MÓVIL: botón hamburguesa + drawer ──────────────────────── */}
+      {/* MÓVIL */}
       <div className="md:hidden">
-        {/* Topbar móvil */}
         <div className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between bg-brand-navy px-4 py-3 border-b border-white/10">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="FP" className="h-8 w-8 rounded-lg bg-white/95 p-0.5"
@@ -100,11 +113,7 @@ export default function Sidebar() {
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
-
-        {/* Spacer para no tapar contenido */}
         <div className="h-14" />
-
-        {/* Drawer overlay */}
         {mobileOpen && (
           <div className="fixed inset-0 z-30 flex" onClick={() => setMobileOpen(false)}>
             <div className="w-64 flex flex-col bg-brand-navy text-white h-full shadow-2xl"

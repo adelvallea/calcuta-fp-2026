@@ -6,9 +6,11 @@ import { buildPoolSummary } from '@/lib/calculations'
 import type { Participant, Lot, PrizeRule, Team, SponsorContribution } from '@/types'
 import Link from 'next/link'
 import { Gavel, Users, Trophy, DollarSign, TrendingUp, AlertCircle } from 'lucide-react'
+import { useIsAdmin } from '@/hooks/useIsAdmin'
 
 export default function DashboardPage() {
   const supabase = createClient()
+  const isAdmin = useIsAdmin()
   const [pool, setPool] = useState<any>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [lots, setLots] = useState<Lot[]>([])
@@ -261,7 +263,133 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+      {/* ── RECORDATORIO DE PAGO ─────────────────────────────────────── */}
+      {pool.total_pending > 0 && (
+        <div className="rounded-xl bg-brand-navy text-white px-5 py-4 flex items-center gap-4">
+          <span className="text-3xl shrink-0">💰</span>
+          <div>
+            <p className="font-bold">Recordatorio para todos los participantes</p>
+            <p className="text-sm text-white/70 mt-0.5">
+              Te recordamos liquidar tu saldo con el moderador. Quedan{' '}
+              <strong className="text-brand-gold">{fmt(pool.total_pending)}</strong> pendientes.
+              ¡No dejes que te persigan después del Mundial! ⚽
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── RESUMEN CON HUMOR ─────────────────────────────────────────── */}
+      <AuctionHumor participants={participants} lots={lots} fmt={fmt} />
+
       </div> {/* cierre px-6 */}
+    </div>
+  )
+}
+
+/* ── Tarjetas de humor ────────────────────────────────────────────────────── */
+function AuctionHumor({ participants, lots, fmt }: {
+  participants: Participant[]; lots: Lot[]; fmt: (n: number) => string
+}) {
+  if (lots.filter(l => l.status === 'sold').length === 0) return null
+
+  function totalBids(pId: string) {
+    return lots.filter(l => l.status === 'sold' && l.ownerships?.some((o: any) => o.participant_id === pId))
+      .reduce((s, l) => s + (l.final_price ?? 0), 0)
+  }
+
+  // El Ricachón — mayor monto total pujado
+  const ricachon = [...participants].sort((a, b) => totalBids(b.id) - totalBids(a.id))[0]
+
+  // El Codo — lote vendido más barato
+  const codolot = [...lots.filter(l => l.status === 'sold' && l.final_price! > 0)]
+    .sort((a, b) => (a.final_price ?? 999999) - (b.final_price ?? 999999))[0]
+  const codo = participants.find(p => codolot?.ownerships?.some((o: any) => o.participant_id === p.id))
+
+  // El Dormido — pagó buy-in pero no compró nada
+  const dormidos = participants.filter(p => totalBids(p.id) === 0)
+
+  // El Farol — pagó más de $3,000 por un combo de 4 equipos
+  const farlot = lots.filter(l => l.status === 'sold' && l.type === 'combo' && (l.final_price ?? 0) > 3000)
+    .sort((a, b) => (b.final_price ?? 0) - (a.final_price ?? 0))[0]
+  const farol = participants.find(p => farlot?.ownerships?.some((o: any) => o.participant_id === p.id))
+
+  // El Pechofrío — compró a Argentina
+  const argLot = lots.find(l => l.status === 'sold' && (l as any).teams?.some((t: any) => t.country_code === 'ARG'))
+  const pechofrio = participants.find(p => argLot?.ownerships?.some((o: any) => o.participant_id === p.id))
+
+  // La Ganga — lote solo vendido más barato
+  const gangaLot = [...lots.filter(l => l.status === 'sold' && l.type === 'solo')]
+    .sort((a, b) => (a.final_price ?? 999999) - (b.final_price ?? 999999))[0]
+  const gangaOwner = participants.find(p => gangaLot?.ownerships?.some((o: any) => o.participant_id === p.id))
+
+  // El Agiotista — compró a España (#1 FIFA) más caro
+  const espanaLot = lots.find(l => l.status === 'sold' && (l as any).teams?.some((t: any) => t.country_code === 'ESP'))
+  const agiotista = participants.find(p => espanaLot?.ownerships?.some((o: any) => o.participant_id === p.id))
+
+  const cards = [
+    ricachon && totalBids(ricachon.id) > 0 && {
+      emoji: '🤑', title: 'El Ricachón',
+      name: ricachon.name,
+      desc: `Pujó ${fmt(totalBids(ricachon.id))} en total. Claramente no le duele el dinero... o sí.`,
+      color: 'bg-amber-50 border-amber-200',
+    },
+    codo && codolot && {
+      emoji: '🤏', title: 'El Codo',
+      name: codo.name,
+      desc: `Compró "${codolot.title}" por apenas ${fmt(codolot.final_price ?? 0)}. ¡Un maestro de la negociación!`,
+      color: 'bg-green-50 border-green-200',
+    },
+    dormidos.length > 0 && {
+      emoji: '😴', title: 'El Dormido',
+      name: dormidos.map(d => d.name).join(', '),
+      desc: `Pagó el buy-in y no compró nada. El sueño es libre, pero el buy-in no.`,
+      color: 'bg-blue-50 border-blue-200',
+    },
+    farol && farlot && {
+      emoji: '😤', title: 'El Farol',
+      name: farol.name,
+      desc: `Pagó ${fmt(farlot.final_price ?? 0)} por un combo. La esperanza es lo último que muere.`,
+      color: 'bg-purple-50 border-purple-200',
+    },
+    pechofrio && argLot && {
+      emoji: '🥶', title: 'El Pechofrío',
+      name: pechofrio.name,
+      desc: `Compró a Argentina por ${fmt(argLot.final_price ?? 0)}. O eres fan o tienes fe ciega.`,
+      color: 'bg-sky-50 border-sky-200',
+    },
+    gangaOwner && gangaLot && {
+      emoji: '🛒', title: 'La Ganga',
+      name: gangaOwner.name,
+      desc: `"${gangaLot.title}" por ${fmt(gangaLot.final_price ?? 0)}. Alguien se durmió en la subasta.`,
+      color: 'bg-lime-50 border-lime-200',
+    },
+    agiotista && espanaLot && (espanaLot.final_price ?? 0) > 2000 && {
+      emoji: '👑', title: 'El Agiotista',
+      name: agiotista.name,
+      desc: `${fmt(espanaLot.final_price ?? 0)} por España #1 FIFA. Listo para cobrar... o llorar.`,
+      color: 'bg-orange-50 border-orange-200',
+    },
+  ].filter(Boolean) as { emoji: string; title: string; name: string; desc: string; color: string }[]
+
+  if (cards.length === 0) return null
+
+  return (
+    <div>
+      <h2 className="text-xs font-bold uppercase tracking-widest text-brand-slate mb-3 flex items-center gap-2">
+        🎭 Galería de Honor (y Deshonor)
+      </h2>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {cards.map(({ emoji, title, name, desc, color }) => (
+          <div key={title} className={`rounded-xl border ${color} px-4 py-3`}>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-2xl">{emoji}</span>
+              <p className="font-black text-brand-navy text-sm">{title}</p>
+            </div>
+            <p className="text-xs font-bold text-brand-navy-mid mb-0.5">{name}</p>
+            <p className="text-[10px] text-gray-500 leading-relaxed">{desc}</p>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
