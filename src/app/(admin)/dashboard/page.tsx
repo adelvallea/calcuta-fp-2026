@@ -111,6 +111,18 @@ export default function DashboardPage() {
       </div>
 
       <div className="p-6 space-y-6">
+
+      {/* ── MENSAJE DE AGRADECIMIENTO ─────────────────────────────── */}
+      <div className="rounded-2xl bg-brand-navy text-white px-5 py-4">
+        <p className="text-brand-gold font-bold text-sm mb-1">🏆 Primera Edición · Gran Calcuta FP — Mundial 2026</p>
+        <p className="text-white/80 text-xs leading-relaxed">
+          Gracias a todos por participar en esta primera edición. Un agradecimiento especial a{' '}
+          <strong className="text-brand-gold">MiGolazo Murguía</strong> y a{' '}
+          <strong className="text-brand-gold">Ramírez</strong> por patrocinar media calcuta.{' '}
+          ¡Sin ustedes esto no habría sido posible! 🙌⚽
+        </p>
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
@@ -299,80 +311,85 @@ function AuctionHumor({ participants, lots, fmt }: {
     return lots.filter(l => l.status === 'sold' && l.ownerships?.some((o: any) => o.participant_id === pId))
       .reduce((s, l) => s + (l.final_price ?? 0), 0)
   }
+  function ownerOf(cc: string) {
+    const lot = lots.find(l => l.status === 'sold' && (l as any).teams?.some((t: any) => t.country_code === cc))
+    return { lot, owner: participants.find(p => lot?.ownerships?.some((o: any) => o.participant_id === p.id)) }
+  }
 
-  // El Ricachón — mayor monto total pujado
   const ricachon = [...participants].sort((a, b) => totalBids(b.id) - totalBids(a.id))[0]
-
-  // El Codo — lote vendido más barato
-  const codolot = [...lots.filter(l => l.status === 'sold' && l.final_price! > 0)]
-    .sort((a, b) => (a.final_price ?? 999999) - (b.final_price ?? 999999))[0]
-  const codo = participants.find(p => codolot?.ownerships?.some((o: any) => o.participant_id === p.id))
-
-  // El Dormido — pagó buy-in pero no compró nada
+  const codolot  = [...lots.filter(l => l.status === 'sold' && (l.final_price ?? 0) > 0)].sort((a,b)=>(a.final_price??999999)-(b.final_price??999999))[0]
+  const codo     = participants.find(p => codolot?.ownerships?.some((o: any) => o.participant_id === p.id))
   const dormidos = participants.filter(p => totalBids(p.id) === 0)
+  const farlot   = lots.filter(l => l.status==='sold' && l.type==='combo' && (l.final_price??0)>3000).sort((a,b)=>(b.final_price??0)-(a.final_price??0))[0]
+  const farol    = participants.find(p => farlot?.ownerships?.some((o: any) => o.participant_id === p.id))
+  const gangaLot = [...lots.filter(l => l.status==='sold' && l.type==='solo')].sort((a,b)=>(a.final_price??999999)-(b.final_price??999999))[0]
+  const ganga    = participants.find(p => gangaLot?.ownerships?.some((o: any) => o.participant_id === p.id))
 
-  // El Farol — pagó más de $3,000 por un combo de 4 equipos
-  const farlot = lots.filter(l => l.status === 'sold' && l.type === 'combo' && (l.final_price ?? 0) > 3000)
-    .sort((a, b) => (b.final_price ?? 0) - (a.final_price ?? 0))[0]
-  const farol = participants.find(p => farlot?.ownerships?.some((o: any) => o.participant_id === p.id))
+  const { lot: argLot, owner: argOwner }  = ownerOf('ARG')
+  const { lot: mexLot, owner: mexOwner }  = ownerOf('MEX')
+  const { lot: espLot, owner: espOwner }  = ownerOf('ESP')
+  const { lot: porLot, owner: porOwner }  = ownerOf('POR')
 
-  // El Pechofrío — compró a Argentina
-  const argLot = lots.find(l => l.status === 'sold' && (l as any).teams?.some((t: any) => t.country_code === 'ARG'))
-  const pechofrio = participants.find(p => argLot?.ownerships?.some((o: any) => o.participant_id === p.id))
+  // Hardcoded por petición del grupo
+  const arechibert = participants.find(p => p.name.toLowerCase().includes('arechibert'))
+  const roca       = participants.find(p => p.name.toLowerCase().includes('roca'))
 
-  // La Ganga — lote solo vendido más barato
-  const gangaLot = [...lots.filter(l => l.status === 'sold' && l.type === 'solo')]
-    .sort((a, b) => (a.final_price ?? 999999) - (b.final_price ?? 999999))[0]
-  const gangaOwner = participants.find(p => gangaLot?.ownerships?.some((o: any) => o.participant_id === p.id))
+  const cards: { emoji: string; title: string; titleStrike?: string; name: string; desc: string; color: string }[] = []
 
-  // El Agiotista — compró a España (#1 FIFA) más caro
-  const espanaLot = lots.find(l => l.status === 'sold' && (l as any).teams?.some((t: any) => t.country_code === 'ESP'))
-  const agiotista = participants.find(p => espanaLot?.ownerships?.some((o: any) => o.participant_id === p.id))
+  if (ricachon && totalBids(ricachon.id) > 0)
+    cards.push({ emoji:'🤑', title:'El Ricachón', name: ricachon.name,
+      desc:`Pujó ${fmt(totalBids(ricachon.id))} en total. Claramente no le duele el dinero... o sí.`,
+      color:'bg-amber-50 border-amber-200' })
 
-  const cards = [
-    ricachon && totalBids(ricachon.id) > 0 && {
-      emoji: '🤑', title: 'El Ricachón',
-      name: ricachon.name,
-      desc: `Pujó ${fmt(totalBids(ricachon.id))} en total. Claramente no le duele el dinero... o sí.`,
-      color: 'bg-amber-50 border-amber-200',
-    },
-    codo && codolot && {
-      emoji: '🤏', title: 'El Maestro',
-      name: codo.name,
-      desc: `Compró "${codolot.title}" por apenas ${fmt(codolot.final_price ?? 0)}. ¡Un maestro de la negociación!`,
-      color: 'bg-green-50 border-green-200',
-    },
-    dormidos.length > 0 && {
-      emoji: '😴', title: dormidos.length === 1 ? 'El Dormido' : 'Los Dormidos',
-      name: dormidos.map(d => d.name).join(', '),
-      desc: `Pagaron el buy-in y no compraron nada. El sueño es libre, pero el buy-in no.`,
-      color: 'bg-blue-50 border-blue-200',
-    },
-    farol && farlot && {
-      emoji: '😤', title: 'El Farol',
-      name: farol.name,
-      desc: `Pagó ${fmt(farlot.final_price ?? 0)} por un combo. La esperanza es lo último que muere.`,
-      color: 'bg-purple-50 border-purple-200',
-    },
-    pechofrio && argLot && {
-      emoji: '🥶', title: 'El Pechofrío',
-      name: pechofrio.name,
-      desc: `Compró a Argentina por ${fmt(argLot.final_price ?? 0)}. O eres fan o tienes fe ciega.`,
-      color: 'bg-sky-50 border-sky-200',
-    },
-    gangaOwner && gangaLot && {
-      emoji: '🛒', title: 'La Ganga',
-      name: gangaOwner.name,
-      desc: `"${gangaLot.title}" por ${fmt(gangaLot.final_price ?? 0)}. Alguien se durmió en la subasta.`,
-      color: 'bg-lime-50 border-lime-200',
-    },
-    agiotista && espanaLot && (espanaLot.final_price ?? 0) > 2000 && {
-      emoji: '👑', title: 'El Ludópata Gachupín',
-      name: agiotista.name,
-      desc: `${fmt(espanaLot.final_price ?? 0)} por España #1 FIFA. Listo para cobrar... o llorar.`,
-      color: 'bg-orange-50 border-orange-200',
-    },
-  ].filter(Boolean) as { emoji: string; title: string; name: string; desc: string; color: string }[]
+  if (codo && codolot)
+    cards.push({ emoji:'🤏', title:'El Maestro', name: codo.name,
+      desc:`"${codolot.title}" por ${fmt(codolot.final_price??0)}. ¡Un maestro de la negociación!`,
+      color:'bg-green-50 border-green-200' })
+
+  if (dormidos.length > 0)
+    cards.push({ emoji:'😴', title: dormidos.length===1?'El Dormido':'Los Dormidos', name: dormidos.map(d=>d.name).join(', '),
+      desc:`Pagaron el buy-in y no compraron nada. El sueño es libre, pero el buy-in no.`,
+      color:'bg-blue-50 border-blue-200' })
+
+  if (farol && farlot)
+    cards.push({ emoji:'😤', title:'El Farol', name: farol.name,
+      desc:`Pagó ${fmt(farlot.final_price??0)} por un combo. La esperanza es lo último que muere.`,
+      color:'bg-purple-50 border-purple-200' })
+
+  if (argOwner && argLot)
+    cards.push({ emoji:'🥶', titleStrike:'El Pechofrío', title:'La de Rosario', name: argOwner.name,
+      desc:`Compró a Argentina por ${fmt(argLot.final_price??0)}. ¡La de Rosario! ¿Sabio o Pecho-frío?`,
+      color:'bg-sky-50 border-sky-200' })
+
+  if (mexOwner && mexLot)
+    cards.push({ emoji:'🇲🇽', title:'El Patriota', name: mexOwner.name,
+      desc:`Compró a México por ${fmt(mexLot.final_price??0)}. El amor a la patria no tiene precio... pero tiene buy-in.`,
+      color:'bg-green-50 border-green-300' })
+
+  if (ganga && gangaLot)
+    cards.push({ emoji:'🛒', title:'La Ganga', name: ganga.name,
+      desc:`"${gangaLot.title}" por ${fmt(gangaLot.final_price??0)}. Alguien se durmió en la subasta.`,
+      color:'bg-lime-50 border-lime-200' })
+
+  if (espOwner && espLot && (espLot.final_price??0)>2000)
+    cards.push({ emoji:'👑', title:'El Ludópata Gachupín', name: espOwner.name,
+      desc:`${fmt(espLot.final_price??0)} por España #1 FIFA. Listo para cobrar... o llorar.`,
+      color:'bg-orange-50 border-orange-200' })
+
+  if (porOwner && porLot)
+    cards.push({ emoji:'🦅', title:'El Bicholover', name: porOwner.name,
+      desc:`Compró a Portugal por ${fmt(porLot.final_price??0)}. Fan de Cristiano o del buen fútbol, tú decides.`,
+      color:'bg-red-50 border-red-200' })
+
+  if (arechibert)
+    cards.push({ emoji:'🧠', title:'Los Conocedores', name: arechibert.name,
+      desc:`Expertos del fútbol mundial. Saben de táctica, de análisis... y de apostar con conocimiento.`,
+      color:'bg-indigo-50 border-indigo-200' })
+
+  if (roca)
+    cards.push({ emoji:'🏃', title:'El Retirado', name: roca.name,
+      desc:`Deportista de alto rendimiento. Ahora en la cancha de la Calcuta, donde la resistencia también cuenta.`,
+      color:'bg-teal-50 border-teal-200' })
 
   if (cards.length === 0) return null
 
@@ -382,11 +399,14 @@ function AuctionHumor({ participants, lots, fmt }: {
         🎭 Resumen de la Subasta
       </h2>
       <div className="grid gap-3 sm:grid-cols-2">
-        {cards.map(({ emoji, title, name, desc, color }) => (
+        {cards.map(({ emoji, title, titleStrike, name, desc, color }) => (
           <div key={title} className={`rounded-xl border ${color} px-4 py-3`}>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-2xl">{emoji}</span>
-              <p className="font-black text-brand-navy text-sm">{title}</p>
+              <div>
+                {titleStrike && <p className="font-bold text-gray-400 text-xs line-through">{titleStrike}</p>}
+                <p className="font-black text-brand-navy text-sm">{title}</p>
+              </div>
             </div>
             <p className="text-xs font-bold text-brand-navy-mid mb-0.5">{name}</p>
             <p className="text-[10px] text-gray-500 leading-relaxed">{desc}</p>

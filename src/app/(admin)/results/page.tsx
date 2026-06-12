@@ -50,7 +50,7 @@ const WC2026_GROUPS: Record<string, string[]> = {
   'L': ['ENG','CRO','GHA','PAN'],
 }
 
-type TabType = 'groups' | 'standings' | 'bracket' | 'matches'
+type TabType = 'groups' | 'standings' | 'ranking' | 'bracket' | 'matches'
 
 export default function ResultsPage() {
   const supabase = createClient()
@@ -158,6 +158,7 @@ export default function ResultsPage() {
   const TABS: { key: TabType; label: string }[] = [
     { key: 'groups',    label: '📊 Grupos' },
     { key: 'standings', label: '🗂 Tabla general' },
+    { key: 'ranking',   label: '🏅 Ranking FIFA' },
     { key: 'bracket',   label: '🏆 Llaves' },
     { key: 'matches',   label: '⚽ Partidos' },
   ]
@@ -307,6 +308,43 @@ export default function ResultsPage() {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* ── TAB: RANKING FIFA ────────────────────────────────────────────────── */}
+      {tab === 'ranking' && (
+        <div className="space-y-1.5 pb-4">
+          <div className="rounded-xl bg-blue-50 border border-blue-100 px-4 py-2.5 text-xs text-blue-700 mb-2">
+            Las posiciones se actualizarán automáticamente conforme avancen los resultados del Mundial 2026.
+          </div>
+          {[...teams].sort((a,b)=>(a.fifa_rank??999)-(b.fifa_rank??999)).map((team, i) => {
+            const ownerLot = teams.length > 0 ? null : null // lots not in scope here
+            const STATUS_ICON: Record<string,string> = { champion:'🏆', runner_up:'🥈', third_place:'🥉', semifinal:'4️⃣', quarterfinal:'8️⃣', round_of_16:'🔟', round_of_32:'3️⃣2️⃣', group_stage:'⚽', eliminated:'❌' }
+            return (
+              <div key={team.id} className="rounded-xl bg-white border border-gray-100 flex items-center gap-2.5 px-3 py-2.5">
+                <span className="text-xs font-bold text-gray-400 w-6 text-right shrink-0">{i+1}</span>
+                <div className="h-7 w-11 rounded overflow-hidden bg-gray-100 shrink-0">
+                  <img src={`https://flagcdn.com/w80/${flagCode(team.country_code)}.png`} alt={team.name}
+                    className="h-full w-full object-cover"
+                    onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="text-sm font-bold text-brand-navy truncate">{team.name}</p>
+                    {team.current_status !== 'not_started' && STATUS_ICON[team.current_status] && (
+                      <span className="text-xs">{STATUS_ICON[team.current_status]}</span>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-gray-400">{team.confederation} · {team.group_wc2026 ? `Grupo ${team.group_wc2026}` : '—'}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-black text-brand-navy">#{team.fifa_rank}</p>
+                  <p className="text-[9px] text-gray-400">Bombo {team.pot}</p>
+                  {team.current_points > 0 && <p className="text-[9px] text-blue-600 font-bold">{team.current_points} pts</p>}
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
 

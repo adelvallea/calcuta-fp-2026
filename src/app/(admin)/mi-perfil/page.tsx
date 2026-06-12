@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { parseProbs, getLotDisplayProbs, flagCode } from '@/lib/lot-utils'
 import { formatCurrency } from '@/lib/calculations'
+import toast from 'react-hot-toast'
 
 export default function MiPerfilPage() {
   const supabase = createClient()
@@ -28,6 +29,9 @@ export default function MiPerfilPage() {
   }, [])
 
   const fmt = (n: number) => formatCurrency(n, settings?.currency ?? 'MXN')
+
+  const [avatarUrl, setAvatarUrl] = useState('')
+  const [savingAvatar, setSavingAvatar] = useState(false)
 
   const me = participants.find(p => p.id === selectedId)
   const myLots = lots.filter(l => l.status === 'sold' && l.ownerships?.some((o: any) => o.participant_id === selectedId))
@@ -74,6 +78,45 @@ export default function MiPerfilPage() {
             <div className="card text-center col-span-2 sm:col-span-1">
               <p className="text-xl font-black text-brand-navy">{myLots.length}</p>
               <p className="text-[10px] text-gray-400 uppercase mt-0.5">Lotes comprados</p>
+            </div>
+          </div>
+
+          {/* Foto de perfil */}
+          <div className="card">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-slate mb-3">📸 Foto de perfil</p>
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded-2xl overflow-hidden bg-gray-100 border-2 border-gray-200 shrink-0">
+                {(me?.avatar_url || avatarUrl) ? (
+                  <img src={me?.avatar_url || avatarUrl} alt={me?.name}
+                    className="h-full w-full object-cover"
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center bg-brand-navy">
+                    <span className="text-2xl font-black text-brand-gold">{me?.name?.[0]?.toUpperCase()}</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <label className="text-xs text-gray-500 mb-1 block">URL de tu foto (enlace de imagen)</label>
+                <input value={avatarUrl || me?.avatar_url || ''} onChange={e => setAvatarUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs focus:border-brand-gold focus:outline-none" />
+                <button onClick={async () => {
+                  if (!avatarUrl && !me?.avatar_url) return
+                  setSavingAvatar(true)
+                  try {
+                    await supabase.from('participants').update({ avatar_url: avatarUrl || me?.avatar_url }).eq('id', selectedId)
+                    toast.success('Foto actualizada')
+                    load()
+                  } catch { toast.error('Error al guardar') }
+                  finally { setSavingAvatar(false) }
+                }} disabled={savingAvatar} className="mt-1.5 btn-primary text-xs py-1.5">
+                  {savingAvatar ? 'Guardando...' : 'Guardar foto'}
+                </button>
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Pega un link directo de imagen (foto de WhatsApp, Google Photos, etc.)
+                </p>
+              </div>
             </div>
           </div>
 
