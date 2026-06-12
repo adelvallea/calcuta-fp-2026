@@ -110,11 +110,29 @@ export default function MercadoPage() {
     return (
       <div className="p-4 md:p-6 max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold text-brand-blue mb-2">Mercado Secundario</h1>
+
+        {/* Mensaje friendly para participantes */}
+        <div className="card text-center py-12 mb-4">
+          <p className="text-5xl mb-4">🛒</p>
+          <p className="text-lg font-black text-brand-navy mb-2">¡Espéralo pronto!</p>
+          <p className="text-sm text-gray-500 max-w-sm mx-auto">
+            El Mercado Secundario estará disponible en breve. Podrás proponer comprar
+            una porción del lote de otro participante directamente desde aquí.
+          </p>
+          <div className="mt-6 rounded-xl bg-brand-bg border border-gray-100 px-4 py-3 text-xs text-gray-500 max-w-sm mx-auto text-left space-y-1">
+            <p>⚡ Proponer ofertas en tiempo real</p>
+            <p>✅ Aprobación de vendedor + comprador</p>
+            <p>🔐 Ejecución supervisada por el moderador</p>
+            <p>📋 Feed completo de todas las transacciones</p>
+          </div>
+        </div>
+
+        {/* SQL para activar — solo visible si es admin */}
+        {isAdmin && (
         <div className="card bg-amber-50 border-amber-200">
-          <p className="font-bold text-amber-800 mb-2">⚠️ Configuración pendiente</p>
+          <p className="font-bold text-amber-800 mb-2">⚠️ Moderador: activa el Mercado Secundario</p>
           <p className="text-sm text-amber-700 mb-4">
-            Para activar el Mercado Secundario, ejecuta el siguiente SQL en{' '}
-            <strong>Supabase → SQL Editor</strong>:
+            Ejecuta este SQL en <strong>Supabase → SQL Editor</strong>:
           </p>
           <pre className="bg-brand-navy text-green-400 rounded-xl p-4 text-xs overflow-x-auto whitespace-pre-wrap">{`create table if not exists market_offers (
   id uuid primary key default gen_random_uuid(),
@@ -134,8 +152,9 @@ export default function MercadoPage() {
 alter table market_offers enable row level security;
 create policy allow_all on market_offers
   for all using (true) with check (true);`}</pre>
-          <button onClick={load} className="btn-primary mt-4">Reintentar después de ejecutar el SQL</button>
+          <button onClick={load} className="btn-primary mt-4">Reintentar</button>
         </div>
+        )}
       </div>
     )
   }

@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
-import { Download, PlusCircle, Trash2, RotateCcw } from 'lucide-react'
+import { Download, PlusCircle, Trash2, RotateCcw, Lock } from 'lucide-react'
+import { useIsAdmin } from '@/hooks/useIsAdmin'
 
 interface Participant {
   id: string; name: string; buy_in_amount: number; amount_paid: number
@@ -22,6 +23,7 @@ export default function PaymentsPage() {
   const [settings, setSettings] = useState<any>(null)
   const [payForm, setPayForm] = useState<{ participantId: string; amount: string; method: string; notes: string } | null>(null)
   const [loading, setLoading] = useState(false)
+  const isAdmin = useIsAdmin()
 
   async function load() {
     const [{ data: ps }, { data: ls }, { data: pays }, { data: cfg }] = await Promise.all([
@@ -109,9 +111,15 @@ export default function PaymentsPage() {
         </div>
         <div className="flex gap-2">
           <button onClick={exportCSV} className="btn-secondary"><Download className="h-4 w-4" />CSV</button>
-          <button onClick={() => setPayForm({ participantId: '', amount: '', method: 'efectivo', notes: '' })} className="btn-primary">
-            <PlusCircle className="h-4 w-4" />Registrar pago
-          </button>
+          {isAdmin ? (
+            <button onClick={() => setPayForm({ participantId: '', amount: '', method: 'efectivo', notes: '' })} className="btn-primary">
+              <PlusCircle className="h-4 w-4" />Registrar pago
+            </button>
+          ) : (
+            <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-400">
+              <Lock className="h-3.5 w-3.5" /> Solo moderador
+            </div>
+          )}
         </div>
       </div>
 
@@ -212,7 +220,7 @@ export default function PaymentsPage() {
                     </span>
                   </td>
                   <td className="table-cell">
-                    {s > 0 && (
+                    {isAdmin && s > 0 && (
                       <button onClick={() => setPayForm({ participantId: p.id, amount: String(s), method: 'efectivo', notes: '' })}
                         className="rounded-md bg-green-100 px-2 py-1 text-xs font-semibold text-green-700 hover:bg-green-200 transition">
                         Pagar {fmt(s)}
@@ -268,10 +276,12 @@ export default function PaymentsPage() {
                   <td className="table-cell text-gray-500">{p.date}</td>
                   <td className="table-cell text-gray-400">{p.notes ?? '—'}</td>
                   <td className="table-cell">
+                    {isAdmin && (
                     <button onClick={() => undoPayment(p)}
                       className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-red-500 hover:bg-red-50 transition">
                       <RotateCcw className="h-3 w-3" /> Deshacer
                     </button>
+                  )}
                   </td>
                 </tr>
               ))}

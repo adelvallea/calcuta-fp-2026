@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
-import { UserPlus, Pencil, Trash2, CheckCircle, Download } from 'lucide-react'
+import { UserPlus, Pencil, Trash2, Download, Lock } from 'lucide-react'
+import { useIsAdmin } from '@/hooks/useIsAdmin'
 
 interface Participant {
   id: string; name: string; email?: string; phone?: string
@@ -18,6 +19,7 @@ export default function ParticipantsPage() {
   const [editing, setEditing] = useState<Participant | null>(null)
   const [form, setForm] = useState({ name: '', email: '', phone: '', buy_in_amount: 1000, notes: '' })
   const [loading, setLoading] = useState(false)
+  const isAdmin = useIsAdmin()
 
   async function load() {
     const [{ data: ps }, { data: ls }] = await Promise.all([
@@ -88,9 +90,15 @@ export default function ParticipantsPage() {
         </div>
         <div className="flex gap-2">
           <button onClick={exportCSV} className="btn-secondary"><Download className="h-4 w-4" />CSV</button>
-          <button onClick={() => { setEditing(null); setForm({ name: '', email: '', phone: '', buy_in_amount: 1000, notes: '' }); setShowForm(true) }} className="btn-primary">
-            <UserPlus className="h-4 w-4" />Agregar
-          </button>
+          {isAdmin ? (
+            <button onClick={() => { setEditing(null); setForm({ name: '', email: '', phone: '', buy_in_amount: 1000, notes: '' }); setShowForm(true) }} className="btn-primary">
+              <UserPlus className="h-4 w-4" />Agregar
+            </button>
+          ) : (
+            <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-400">
+              <Lock className="h-3.5 w-3.5" /> Solo moderador
+            </div>
+          )}
         </div>
       </div>
 
@@ -171,19 +179,23 @@ export default function ParticipantsPage() {
                   </td>
                   <td className="table-cell">
                     <div className="flex items-center gap-1">
-                      {s > 0 && (
+                      {isAdmin && s > 0 && (
                         <button onClick={() => registerPayment(p, s)}
                           className="rounded-md bg-green-100 px-2 py-1 text-xs font-semibold text-green-700 hover:bg-green-200 transition">
                           Pago completo
                         </button>
                       )}
+                      {isAdmin && (
                       <button onClick={() => { setEditing(p); setForm({ name: p.name, email: p.email ?? '', phone: p.phone ?? '', buy_in_amount: p.buy_in_amount, notes: p.notes ?? '' }); setShowForm(true) }}
                         className="rounded-md p-1.5 hover:bg-gray-100 transition">
                         <Pencil className="h-3.5 w-3.5 text-gray-400" />
                       </button>
+                      )}
+                      {isAdmin && (
                       <button onClick={() => del(p)} className="rounded-md p-1.5 hover:bg-red-50 transition">
                         <Trash2 className="h-3.5 w-3.5 text-red-400" />
                       </button>
+                      )}
                     </div>
                   </td>
                 </tr>

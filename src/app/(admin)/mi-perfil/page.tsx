@@ -98,36 +98,67 @@ export default function MiPerfilPage() {
           <div className="card">
             <p className="text-xs font-bold uppercase tracking-widest text-brand-slate mb-3">📸 Foto de perfil</p>
             <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-2xl overflow-hidden bg-gray-100 border-2 border-gray-200 shrink-0">
-                {(me?.avatar_url || avatarUrl) ? (
-                  <img src={me?.avatar_url || avatarUrl} alt={me?.name}
+              {/* Preview */}
+              <div className="h-20 w-20 rounded-2xl overflow-hidden bg-gray-100 border-2 border-gray-200 shrink-0">
+                {(avatarUrl || me?.avatar_url) ? (
+                  <img src={avatarUrl || me?.avatar_url} alt={me?.name}
                     className="h-full w-full object-cover"
                     onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
                 ) : (
                   <div className="h-full w-full flex items-center justify-center bg-brand-navy">
-                    <span className="text-2xl font-black text-brand-gold">{me?.name?.[0]?.toUpperCase()}</span>
+                    <span className="text-3xl font-black text-brand-gold">{me?.name?.[0]?.toUpperCase()}</span>
                   </div>
                 )}
               </div>
-              <div className="flex-1">
-                <label className="text-xs text-gray-500 mb-1 block">URL de tu foto (enlace de imagen)</label>
-                <input value={avatarUrl || me?.avatar_url || ''} onChange={e => setAvatarUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs focus:border-brand-gold focus:outline-none" />
-                <button onClick={async () => {
-                  if (!avatarUrl && !me?.avatar_url) return
-                  setSavingAvatar(true)
-                  try {
-                    await supabase.from('participants').update({ avatar_url: avatarUrl || me?.avatar_url }).eq('id', selectedId)
-                    toast.success('Foto actualizada')
-                    load()
-                  } catch { toast.error('Error al guardar') }
-                  finally { setSavingAvatar(false) }
-                }} disabled={savingAvatar} className="mt-1.5 btn-primary text-xs py-1.5">
-                  {savingAvatar ? 'Guardando...' : 'Guardar foto'}
-                </button>
-                <p className="text-[10px] text-gray-400 mt-1">
-                  Pega un link directo de imagen (foto de WhatsApp, Google Photos, etc.)
+
+              <div className="flex-1 space-y-2">
+                {/* Botón de cámara / galería — funciona en celular */}
+                <label className="btn-gold w-full justify-center cursor-pointer">
+                  📷 {savingAvatar ? 'Subiendo...' : 'Tomar o elegir foto'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="user"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      setSavingAvatar(true)
+                      try {
+                        // Redimensionar y convertir a base64
+                        const reader = new FileReader()
+                        reader.onload = async (ev) => {
+                          const img = new Image()
+                          img.onload = async () => {
+                            const canvas = document.createElement('canvas')
+                            const size = 300
+                            canvas.width = size; canvas.height = size
+                            const ctx = canvas.getContext('2d')!
+                            // Crop centrado
+                            const scale = size / Math.min(img.width, img.height)
+                            const x = (img.width * scale - size) / 2
+                            const y = (img.height * scale - size) / 2
+                            ctx.drawImage(img, -x / scale, -y / scale, img.width, img.height)
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
+                            setAvatarUrl(dataUrl)
+                            await supabase.from('participants').update({ avatar_url: dataUrl }).eq('id', selectedId)
+                            toast.success('Foto guardada ✓')
+                            load()
+                            setSavingAvatar(false)
+                          }
+                          img.src = ev.target?.result as string
+                        }
+                        reader.readAsDataURL(file)
+                      } catch {
+                        toast.error('Error al subir foto')
+                        setSavingAvatar(false)
+                      }
+                    }}
+                  />
+                </label>
+
+                <p className="text-[10px] text-gray-400 text-center">
+                  Abre la cámara o tu galería de fotos
                 </p>
               </div>
             </div>
