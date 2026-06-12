@@ -77,16 +77,53 @@ export default function MiPerfilPage() {
             </div>
           </div>
 
-          {/* Recordatorio de pago */}
+          {/* Recordatorio + Liquidar Deudas */}
           {balance > 0 && (
-            <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 flex items-start gap-3">
-              <span className="text-xl shrink-0">💰</span>
-              <div>
-                <p className="text-sm font-bold text-amber-800">Saldo pendiente: {fmt(balance)}</p>
-                <p className="text-xs text-amber-600 mt-0.5">
-                  Te recordamos liquidar tu saldo con el moderador. ¡No dejes que te persiga después del partido!
-                </p>
+            <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <span className="text-xl shrink-0">💰</span>
+                <div>
+                  <p className="text-sm font-bold text-amber-800">Saldo pendiente: {fmt(balance)}</p>
+                  <p className="text-xs text-amber-600 mt-0.5">
+                    Liquida tu saldo con el moderador. ¡No dejes que te persigan después del partido!
+                  </p>
+                </div>
               </div>
+
+              {/* Datos de pago */}
+              <div className="rounded-xl bg-white border border-amber-200 p-4 space-y-2">
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">
+                  💳 Datos para transferencia
+                </p>
+                {[
+                  { label: 'Beneficiario', value: 'Alejandro Del Valle Alvarado' },
+                  { label: 'Banco', value: 'Revolut' },
+                  { label: 'CLABE', value: '646990404043598458' },
+                  { label: 'Monto', value: fmt(balance) },
+                ].map(({ label, value }) => (
+                  <div key={label} className="flex items-center justify-between">
+                    <p className="text-xs text-gray-400">{label}</p>
+                    <div className="flex items-center gap-2">
+                      <p className={`text-sm font-bold ${label === 'CLABE' ? 'font-mono tracking-wider' : ''} text-brand-navy`}>
+                        {value}
+                      </p>
+                      {label === 'CLABE' && (
+                        <button onClick={() => {
+                          navigator.clipboard?.writeText(value)
+                            .then(() => alert('CLABE copiada ✓'))
+                            .catch(() => {})
+                        }} className="text-[10px] bg-gray-100 hover:bg-gray-200 rounded px-1.5 py-0.5 text-gray-500 transition">
+                          Copiar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-[10px] text-amber-600 text-center">
+                Una vez que pagues, avísale al moderador para registrar tu pago.
+              </p>
             </div>
           )}
 

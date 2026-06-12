@@ -121,18 +121,20 @@ export async function POST() {
       }
     }
 
-    // Actualizar equipos con estadísticas
+    // Actualizar equipos con estadísticas recalculadas
     for (const [teamId, s] of standingsMap) {
+      const pts   = s.wins * 3 + s.draws
+      const gd    = s.gf - s.ga
       await supabase.from('teams').update({
-        current_points: s.pts,
-        matches_played: s.played,
-        wins: s.wins,
-        draws: s.draws,
-        losses: s.losses,
-        goals_for: s.gf,
-        goals_against: s.ga,
-        current_goal_diff: s.gf - s.ga,
-        current_status: 'group_stage',
+        current_points:    pts,
+        matches_played:    s.played,
+        wins:              s.wins,
+        draws:             s.draws,
+        losses:            s.losses,
+        goals_for:         s.gf,
+        goals_against:     s.ga,
+        current_goal_diff: gd,
+        current_status:    s.played > 0 ? 'group_stage' : 'not_started',
       }).eq('id', teamId)
     }
 

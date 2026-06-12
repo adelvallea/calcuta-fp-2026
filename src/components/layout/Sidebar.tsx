@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import {
   LayoutDashboard, Gavel, Users, List,
-  CreditCard, Trophy, Globe, Settings, Eye, LogOut, Menu, X, UserCircle, Lock,
+  CreditCard, Trophy, Globe, Settings, Eye, LogOut, Menu, X, UserCircle, Lock, Store,
 } from 'lucide-react'
 
 const nav = [
@@ -16,6 +16,7 @@ const nav = [
   { href: '/participants', label: 'FParticipantes',    icon: Users },
   { href: '/lots',         label: 'Lotes',             icon: List },
   { href: '/payments',     label: 'FPagos',            icon: CreditCard },
+  { href: '/mercado',      label: 'Mercado Sec.',       icon: Store },
   { href: '/results',      label: 'Resultados',        icon: Globe },
   { href: '/prizes',       label: 'FPremios',          icon: Trophy },
   { href: '/settings',     label: 'Configuración',     icon: Settings },

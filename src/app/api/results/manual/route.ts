@@ -9,9 +9,17 @@ export async function PUT(req: NextRequest) {
 
   if (!team_id) return NextResponse.json({ error: 'team_id requerido' }, { status: 400 })
 
-  // Calcular current_goal_diff si se dan goals_for y goals_against
+  // Recalcular automáticamente stats derivadas
   if (update.goals_for !== undefined && update.goals_against !== undefined) {
     update.current_goal_diff = update.goals_for - update.goals_against
+  }
+  if (update.wins !== undefined || update.draws !== undefined) {
+    const w = update.wins ?? 0
+    const d = update.draws ?? 0
+    update.current_points = w * 3 + d
+  }
+  if (update.wins !== undefined || update.draws !== undefined || update.losses !== undefined) {
+    update.matches_played = (update.wins ?? 0) + (update.draws ?? 0) + (update.losses ?? 0)
   }
 
   const { error } = await supabase.from('teams').update(update).eq('id', team_id)

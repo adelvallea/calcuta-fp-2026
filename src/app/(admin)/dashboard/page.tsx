@@ -140,6 +140,9 @@ export default function DashboardPage() {
         />
       </div>
 
+      {/* ── RESUMEN DE LA SUBASTA (humor) — antes de premios ── */}
+      <AuctionHumor participants={participants} lots={lots} fmt={fmt} />
+
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Premios */}
         <div className="card">
@@ -263,6 +266,7 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+      {/* ── Humor movido arriba — ya no va aquí ─────────────────────── */}
       {/* ── RECORDATORIO DE PAGO ─────────────────────────────────────── */}
       {pool.total_pending > 0 && (
         <div className="rounded-xl bg-brand-navy text-white px-5 py-4 flex items-center gap-4">
@@ -278,8 +282,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── RESUMEN CON HUMOR ─────────────────────────────────────────── */}
-      <AuctionHumor participants={participants} lots={lots} fmt={fmt} />
+      {/* AuctionHumor movido arriba de premios */}
 
       </div> {/* cierre px-6 */}
     </div>
@@ -334,15 +337,15 @@ function AuctionHumor({ participants, lots, fmt }: {
       color: 'bg-amber-50 border-amber-200',
     },
     codo && codolot && {
-      emoji: '🤏', title: 'El Codo',
+      emoji: '🤏', title: 'El Maestro',
       name: codo.name,
       desc: `Compró "${codolot.title}" por apenas ${fmt(codolot.final_price ?? 0)}. ¡Un maestro de la negociación!`,
       color: 'bg-green-50 border-green-200',
     },
     dormidos.length > 0 && {
-      emoji: '😴', title: 'El Dormido',
+      emoji: '😴', title: dormidos.length === 1 ? 'El Dormido' : 'Los Dormidos',
       name: dormidos.map(d => d.name).join(', '),
-      desc: `Pagó el buy-in y no compró nada. El sueño es libre, pero el buy-in no.`,
+      desc: `Pagaron el buy-in y no compraron nada. El sueño es libre, pero el buy-in no.`,
       color: 'bg-blue-50 border-blue-200',
     },
     farol && farlot && {
@@ -364,7 +367,7 @@ function AuctionHumor({ participants, lots, fmt }: {
       color: 'bg-lime-50 border-lime-200',
     },
     agiotista && espanaLot && (espanaLot.final_price ?? 0) > 2000 && {
-      emoji: '👑', title: 'El Agiotista',
+      emoji: '👑', title: 'El Ludópata Gachupín',
       name: agiotista.name,
       desc: `${fmt(espanaLot.final_price ?? 0)} por España #1 FIFA. Listo para cobrar... o llorar.`,
       color: 'bg-orange-50 border-orange-200',
@@ -376,7 +379,7 @@ function AuctionHumor({ participants, lots, fmt }: {
   return (
     <div>
       <h2 className="text-xs font-bold uppercase tracking-widest text-brand-slate mb-3 flex items-center gap-2">
-        🎭 Galería de Honor (y Deshonor)
+        🎭 Resumen de la Subasta
       </h2>
       <div className="grid gap-3 sm:grid-cols-2">
         {cards.map(({ emoji, title, name, desc, color }) => (
