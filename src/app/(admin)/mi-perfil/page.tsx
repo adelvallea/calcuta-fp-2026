@@ -14,6 +14,19 @@ export default function MiPerfilPage() {
   const [settings, setSettings] = useState<any>(null)
   const [selectedId, setSelectedId] = useState('')
 
+  async function load() {
+    const [{ data: ps }, { data: ls }, { data: pays }, { data: cfg }] = await Promise.all([
+      supabase.from('participants').select('*').order('name'),
+      supabase.from('lots').select('*, teams:lot_teams(team:teams(*)), ownerships:lot_ownerships(participant_id, lot_id, ownership_percentage, participant:participants(name))').order('number'),
+      supabase.from('payments').select('*').order('created_at', { ascending: false }),
+      supabase.from('calcuta_settings').select('*').single(),
+    ])
+    setParticipants(ps ?? [])
+    setLots((ls ?? []).map((l: any) => ({ ...l, teams: l.teams?.map((lt: any) => lt.team).filter(Boolean) ?? [] })))
+    setPayments(pays ?? [])
+    setSettings(cfg)
+  }
+
   useEffect(() => {
     Promise.all([
       supabase.from('participants').select('*').order('name'),
