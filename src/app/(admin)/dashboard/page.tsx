@@ -307,6 +307,7 @@ function AuctionHumor({ participants, lots, fmt }: {
 }) {
   if (lots.filter(l => l.status === 'sold').length === 0) return null
 
+  // Helpers dinámicos
   function totalBids(pId: string) {
     return lots.filter(l => l.status === 'sold' && l.ownerships?.some((o: any) => o.participant_id === pId))
       .reduce((s, l) => s + (l.final_price ?? 0), 0)
@@ -315,27 +316,40 @@ function AuctionHumor({ participants, lots, fmt }: {
     const lot = lots.find(l => l.status === 'sold' && (l as any).teams?.some((t: any) => t.country_code === cc))
     return { lot, owner: participants.find(p => lot?.ownerships?.some((o: any) => o.participant_id === p.id)) }
   }
+  function byName(fragment: string) {
+    return participants.find(p => p.name.toLowerCase().includes(fragment.toLowerCase()))
+  }
 
-  const ricachon = [...participants].sort((a, b) => totalBids(b.id) - totalBids(a.id))[0]
-  const codolot  = [...lots.filter(l => l.status === 'sold' && (l.final_price ?? 0) > 0)].sort((a,b)=>(a.final_price??999999)-(b.final_price??999999))[0]
-  const codo     = participants.find(p => codolot?.ownerships?.some((o: any) => o.participant_id === p.id))
-  const dormidos = participants.filter(p => totalBids(p.id) === 0)
-  const farlot   = lots.filter(l => l.status==='sold' && l.type==='combo' && (l.final_price??0)>3000).sort((a,b)=>(b.final_price??0)-(a.final_price??0))[0]
-  const farol    = participants.find(p => farlot?.ownerships?.some((o: any) => o.participant_id === p.id))
-  const gangaLot = [...lots.filter(l => l.status==='sold' && l.type==='solo')].sort((a,b)=>(a.final_price??999999)-(b.final_price??999999))[0]
-  const ganga    = participants.find(p => gangaLot?.ownerships?.some((o: any) => o.participant_id === p.id))
+  // Dinámicos
+  const ricachon  = [...participants].sort((a, b) => totalBids(b.id) - totalBids(a.id))[0]
+  const codolot   = [...lots.filter(l => l.status==='sold' && (l.final_price??0)>0)].sort((a,b)=>(a.final_price??999999)-(b.final_price??999999))[0]
+  const codo      = participants.find(p => codolot?.ownerships?.some((o: any) => o.participant_id === p.id))
+  const dormidos  = participants.filter(p => totalBids(p.id) === 0)
+  const farlot    = lots.filter(l => l.status==='sold' && l.type==='combo' && (l.final_price??0)>3000).sort((a,b)=>(b.final_price??0)-(a.final_price??0))[0]
+  const farol     = participants.find(p => farlot?.ownerships?.some((o: any) => o.participant_id === p.id))
+  const gangaLot  = [...lots.filter(l => l.status==='sold' && l.type==='solo')].sort((a,b)=>(a.final_price??999999)-(b.final_price??999999))[0]
+  const ganga     = participants.find(p => gangaLot?.ownerships?.some((o: any) => o.participant_id === p.id))
 
-  const { lot: argLot, owner: argOwner }  = ownerOf('ARG')
-  const { lot: mexLot, owner: mexOwner }  = ownerOf('MEX')
-  const { lot: espLot, owner: espOwner }  = ownerOf('ESP')
-  const { lot: porLot, owner: porOwner }  = ownerOf('POR')
+  const { lot: argLot, owner: argOwner } = ownerOf('ARG')
+  const { lot: mexLot, owner: mexOwner } = ownerOf('MEX')
+  const { lot: espLot, owner: espOwner } = ownerOf('ESP')
+  const { lot: porLot, owner: porOwner } = ownerOf('POR')
 
-  // Hardcoded por petición del grupo
-  const arechibert = participants.find(p => p.name.toLowerCase().includes('arechibert'))
-  const roca       = participants.find(p => p.name.toLowerCase().includes('roca'))
+  // Hardcoded por nombre
+  const arechibert = byName('arechibert')
+  const roca       = byName('roca')
+  const lorenza    = byName('lorenza')
+  const macarena   = byName('macarena')
+  const migolazo   = byName('murguia') ?? byName('murguía') ?? byName('migolazo')
+  const gil        = byName('gil')
+  const grizzly    = byName('grizzly') ?? byName('urdaneta')
+  const guri       = byName('guri')
+  const cheni      = byName('cheni')
+  const gambajoe   = byName('gambajoe') ?? byName('gamba')
 
   const cards: { emoji: string; title: string; titleStrike?: string; name: string; desc: string; color: string }[] = []
 
+  // ── Dinámicos ──────────────────────────────────────────────────────────────
   if (ricachon && totalBids(ricachon.id) > 0)
     cards.push({ emoji:'🎭', title:'El Protagonista', name: ricachon.name,
       desc:`Hace lo que sea por no pasar desapercibido... pujó ${fmt(totalBids(ricachon.id))} y por poco pone su casa en la línea.`,
@@ -343,7 +357,7 @@ function AuctionHumor({ participants, lots, fmt }: {
 
   if (codo && codolot)
     cards.push({ emoji:'🤏', title:'El Maestro', name: codo.name,
-      desc:`"${codolot.title}" por ${fmt(codolot.final_price??0)}. ¡Un maestro de la negociación!`,
+      desc:`Compró el lote más barato de la noche por apenas ${fmt(codolot.final_price??0)}. ¡Un maestro de la negociación!`,
       color:'bg-green-50 border-green-200' })
 
   if (dormidos.length > 0)
@@ -352,33 +366,33 @@ function AuctionHumor({ participants, lots, fmt }: {
       color:'bg-blue-50 border-blue-200' })
 
   if (farol && farlot)
-    cards.push({ emoji:'😤', title:'El Farol', name: farol.name,
-      desc:`Pagó ${fmt(farlot.final_price??0)} por un combo. La esperanza es lo último que muere.`,
+    cards.push({ emoji:'😤', title:'El Fomero', name: farol.name,
+      desc:`Pagó $4,400 por el combo Países Bajos + Noruega + Bélgica con tal de hacerse presente. La esperanza es lo último que muere.`,
       color:'bg-purple-50 border-purple-200' })
 
   if (argOwner && argLot)
     cards.push({ emoji:'🥶', titleStrike:'El Pechofrío', title:'La de Rosario', name: argOwner.name,
-      desc:`Compró a Argentina por ${fmt(argLot.final_price??0)}. ¡La de Rosario! ¿Sabio o Pecho-frío?`,
+      desc:`La decisión más sabia de la noche. Compró al campeón del mundo y lo sabía desde el principio.`,
       color:'bg-sky-50 border-sky-200' })
 
   if (mexOwner && mexLot)
     cards.push({ emoji:'🇲🇽', title:'El Patriota', name: mexOwner.name,
-      desc:`Compró a México por ${fmt(mexLot.final_price??0)}. El amor a la patria no tiene precio... pero tiene buy-in.`,
+      desc:`Compró a México. El amor a la patria no tiene precio...`,
       color:'bg-green-50 border-green-300' })
 
   if (ganga && gangaLot)
     cards.push({ emoji:'🛒', title:'La Ganga', name: ganga.name,
-      desc:`"${gangaLot.title}" por ${fmt(gangaLot.final_price??0)}. Alguien se durmió en la subasta.`,
+      desc:`¿Ganga o desperdicio!? El tiempo dirá si fue el deal del siglo o simplemente nadie quería ese lote.`,
       color:'bg-lime-50 border-lime-200' })
 
   if (espOwner && espLot && (espLot.final_price??0)>2000)
     cards.push({ emoji:'👑', title:'El Ludópata Gachupín', name: espOwner.name,
-      desc:`${fmt(espLot.final_price??0)} por España #1 FIFA. Listo para cobrar... o llorar.`,
+      desc:`Pagó una fortuna por España #1 FIFA. Listo para cobrar... o llorar.`,
       color:'bg-orange-50 border-orange-200' })
 
   if (porOwner && porLot)
     cards.push({ emoji:'🦅', title:'El Bicholover', name: porOwner.name,
-      desc:`Compró a Portugal por ${fmt(porLot.final_price??0)}. Fan de Cristiano o del buen fútbol, tú decides.`,
+      desc:`Fan de Cristiano o del buen fútbol, tú decides.`,
       color:'bg-red-50 border-red-200' })
 
   if (arechibert)
@@ -388,8 +402,44 @@ function AuctionHumor({ participants, lots, fmt }: {
 
   if (roca)
     cards.push({ emoji:'🏃', title:'El Retirado', name: roca.name,
-      desc:`Deportista de alto rendimiento. Ahora en la cancha de la Calcuta, donde la resistencia también cuenta.`,
+      desc:`En otra época, deportista de alto rendimiento. Ahora en la cancha de la Calcuta, poniendo sus esperanzas en Paraguay, Australia, Suecia y Túnez.`,
       color:'bg-teal-50 border-teal-200' })
+
+  // ── Hardcoded nominados especiales ────────────────────────────────────────
+  if (lorenza)
+    cards.push({ emoji:'🌶️', title:'Chiquita pero Picosa', name: lorenza.name,
+      desc:`No estar en estado de ebriedad rindió frutos: compró a Inglaterra, un claro favorito, por tan solo $3,200. Cabeza fría, billetera agradecida.`,
+      color:'bg-rose-50 border-rose-200' })
+
+  if (macarena || migolazo)
+    cards.push({ emoji:'🤝', title:'¿Aliados o Enemigos?', name: [macarena?.name, migolazo?.name].filter(Boolean).join(' & '),
+      desc:`Dos sponsors, dos lotes, una misma Calcuta. Si sus equipos se cruzan en eliminatorias... ¿se abrazan o se cobra la deuda?`,
+      color:'bg-violet-50 border-violet-200' })
+
+  if (gil)
+    cards.push({ emoji:'🏦', title:'El Banquero', name: gil.name,
+      desc:`Diferenciando qué deals valen la pena, consiguió a Alemania — 4 veces campeón — por tan solo $2,000. Warren Buffett estaría orgulloso.`,
+      color:'bg-yellow-50 border-yellow-200' })
+
+  if (grizzly)
+    cards.push({ emoji:'✈️', title:'El Turista', name: grizzly.name,
+      desc:`Hizo el viaje desde lejos para unirse a la Calcuta y se llevó a Bosnia y Herzegovina. El esfuerzo fue épico, el lote... pintoresco.`,
+      color:'bg-cyan-50 border-cyan-200' })
+
+  if (guri)
+    cards.push({ emoji:'🎯', title:'El Francotirador', name: guri.name,
+      desc:`Una sola bala, un solo objetivo: Curazao en su debut histórico. ¿Estratega visionario o simplemente llegó cuando ya no quedaba nada? La historia dirá.`,
+      color:'bg-gray-50 border-gray-200' })
+
+  if (cheni)
+    cards.push({ emoji:'🇰🇷', title:'El Malinchista', name: cheni.name,
+      desc:`Apoyando a Corea del Sur, rival directo de México en el Grupo A. Con amigos así, ¿pa' qué rivales?`,
+      color:'bg-red-50 border-red-300' })
+
+  if (gambajoe)
+    cards.push({ emoji:'🌴', title:'El Viajero del Caribe', name: gambajoe.name,
+      desc:`Cuando todos corrían por los favoritos, él apostó por Haití en su debut histórico. Visión distinta, ritmo diferente, corazón grande.`,
+      color:'bg-emerald-50 border-emerald-200' })
 
   if (cards.length === 0) return null
 

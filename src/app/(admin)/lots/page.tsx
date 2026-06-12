@@ -111,18 +111,7 @@ export default function LotsPage() {
             {lots.length} lotes · {lots.filter(l => l.status === 'sold').length} vendidos · Recaudado: {fmt(totalSold)}
           </p>
         </div>
-        <div className="flex gap-2">
-          {reorderMode ? (
-            <>
-              <button onClick={saveOrder} disabled={saving} className="btn-gold">{saving ? 'Guardando...' : 'Guardar orden'}</button>
-              <button onClick={() => { setReorderMode(false); load() }} className="btn-secondary">Cancelar</button>
-            </>
-          ) : (
-            <button onClick={() => setReorderMode(true)} className="btn-secondary">
-              <GripVertical className="h-4 w-4" /> Reordenar
-            </button>
-          )}
-        </div>
+        <div />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
