@@ -337,8 +337,8 @@ function AuctionHumor({ participants, lots, fmt }: {
   const cards: { emoji: string; title: string; titleStrike?: string; name: string; desc: string; color: string }[] = []
 
   if (ricachon && totalBids(ricachon.id) > 0)
-    cards.push({ emoji:'🤑', title:'El Ricachón', name: ricachon.name,
-      desc:`Pujó ${fmt(totalBids(ricachon.id))} en total. Claramente no le duele el dinero... o sí.`,
+    cards.push({ emoji:'🎭', title:'El Protagonista', name: ricachon.name,
+      desc:`Hace lo que sea por no pasar desapercibido... pujó ${fmt(totalBids(ricachon.id))} y por poco pone su casa en la línea.`,
       color:'bg-amber-50 border-amber-200' })
 
   if (codo && codolot)
