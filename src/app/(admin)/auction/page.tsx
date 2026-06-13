@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Gavel, ChevronRight } from 'lucide-react'
+import { Gavel, ChevronRight, FileDown } from 'lucide-react'
 import OpenLotButton from './OpenLotButton'
 
 export const dynamic = 'force-dynamic'
@@ -32,11 +32,16 @@ export default async function AuctionPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-brand-blue">Subasta</h1>
           <p className="text-sm text-brand-slate">18 lotes · 48 equipos</p>
         </div>
+        <Link href="/auction/export" target="_blank"
+          className="flex items-center gap-2 rounded-xl bg-brand-navy px-4 py-2 text-sm font-bold text-white hover:bg-brand-navy-mid transition">
+          <FileDown className="h-4 w-4 text-brand-gold" />
+          Exportar resultados
+        </Link>
       </div>
 
       {/* En subasta ahora */}

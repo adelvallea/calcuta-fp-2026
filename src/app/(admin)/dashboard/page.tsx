@@ -330,7 +330,8 @@ function AuctionHumor({ participants, lots, fmt }: {
   const codolot   = [...lots.filter(l => l.status==='sold' && (l.final_price??0)>0)].sort((a,b)=>(a.final_price??999999)-(b.final_price??999999))[0]
   const codo      = participants.find(p => codolot?.ownerships?.some((o: any) => o.participant_id === p.id))
   const dormidos  = participants.filter(p => totalBids(p.id) === 0)
-  const farlot    = lots.filter(l => l.status==='sold' && l.type==='combo' && (l.final_price??0)>3000).sort((a,b)=>(b.final_price??0)-(a.final_price??0))[0]
+  // El Fomero = dueño del Lote 15 (Costa de Marfil + Panamá + Cabo Verde)
+  const farlot    = lots.find(l => l.status==='sold' && (l as any).number === 15)
   const farol     = participants.find(p => farlot?.ownerships?.some((o: any) => o.participant_id === p.id))
   const gangaLot  = [...lots.filter(l => l.status==='sold' && l.type==='solo')].sort((a,b)=>(a.final_price??999999)-(b.final_price??999999))[0]
   const ganga     = participants.find(p => gangaLot?.ownerships?.some((o: any) => o.participant_id === p.id))
@@ -375,7 +376,7 @@ function AuctionHumor({ participants, lots, fmt }: {
 
   if (farol && farlot)
     cards.push({ emoji:'😤', title:'El Fomero', name: farol.name,
-      desc:`Pagó $4,400 por el combo Países Bajos + Noruega + Bélgica con tal de hacerse presente. La esperanza es lo último que muere.`,
+      desc:`Pagó $4,400 por el Lote 15 (Costa de Marfil + Panamá + Cabo Verde) con tal de hacerse presente. La esperanza es lo último que muere.`,
       color:'bg-purple-50 border-purple-200' })
 
   if (argOwner && argLot)
