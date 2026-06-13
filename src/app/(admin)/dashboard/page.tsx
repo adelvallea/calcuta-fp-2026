@@ -170,18 +170,23 @@ export default function DashboardPage() {
                   <p className="text-xs text-brand-slate">{fmt(p.prize_amount)}</p>
                 </div>
                 <div className="text-right">
-                  {p.current_candidate ? (
-                    <div>
-                      <p className="text-sm font-bold text-brand-navy-mid">{p.current_candidate.team.name}</p>
-                      <p className="text-xs text-brand-slate">
-                        Lote {p.current_candidate.lot.number}
-                        {p.current_candidate.ownerships.length > 0 &&
-                          ` · ${p.current_candidate.ownerships.map((o: any) => o.participant?.name ?? '—').join(', ')}`}
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-brand-slate italic">Sin candidato aún</p>
-                  )}
+                  {(() => {
+                    // Solo mostrar candidato si está en fase eliminatoria o tiene posición final
+                    const KNOCKOUT = ['champion','runner_up','third_place','semifinal','quarterfinal','round_of_16','round_of_32']
+                    const c = p.current_candidate
+                    const showCandidate = c && (c.team.final_position || KNOCKOUT.includes(c.team.current_status))
+                    return showCandidate ? (
+                      <div>
+                        <p className="text-sm font-bold text-brand-navy-mid">{c!.team.name}</p>
+                        <p className="text-xs text-brand-slate">
+                          Lote {c!.lot.number}
+                          {c!.ownerships.length > 0 && ` · ${c!.ownerships.map((o: any) => o.participant?.name ?? '—').join(', ')}`}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-brand-slate italic">Se define al avanzar el torneo</p>
+                    )
+                  })()}
                 </div>
               </div>
             ))}
@@ -418,7 +423,7 @@ function AuctionHumor({ participants, lots, fmt }: {
       color:'bg-rose-50 border-rose-200' })
 
   if (macarena || migolazo)
-    cards.push({ emoji:'🤝', title:'¿Aliados o Enemigos?', name: [macarena?.name, migolazo?.name].filter(Boolean).join(' & '),
+    cards.push({ emoji:'🤝', title:'¿Aliados o Enemigos?', name: 'Isa',
       desc:`Dos sponsors, dos lotes, una misma Calcuta. Si sus equipos se cruzan en eliminatorias... ¿se abrazan o se cobra la deuda?`,
       color:'bg-violet-50 border-violet-200' })
 

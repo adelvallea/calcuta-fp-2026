@@ -577,7 +577,7 @@ export default function PublicPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-brand-navy">{p.rule.name}</p>
                   <p className="text-[10px] text-gray-400">{p.rule.description}</p>
-                  {p.current_candidate && (
+                  {p.current_candidate && ['champion','runner_up','third_place','semifinal','quarterfinal','round_of_16','round_of_32'].includes(p.current_candidate.team.current_status) && (
                     <div className="mt-1 flex items-center gap-1.5">
                       <img src={`https://flagcdn.com/w40/${flagCode(p.current_candidate.team.country_code)}.png`}
                         className="h-3 w-4.5 rounded object-cover" alt=""

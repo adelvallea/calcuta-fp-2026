@@ -31,7 +31,9 @@ export default async function PrizesPage() {
 
       <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
         {pool.prizes.map((prize) => {
-          const candidate = prize.current_candidate
+          const KNOCKOUT = ['champion','runner_up','third_place','semifinal','quarterfinal','round_of_16','round_of_32']
+          const raw = prize.current_candidate
+          const candidate = raw && (raw.team.final_position || KNOCKOUT.includes(raw.team.current_status)) ? raw : null
           return (
             <div key={prize.rule.id} className="card">
               <div className="flex items-start justify-between mb-3">
