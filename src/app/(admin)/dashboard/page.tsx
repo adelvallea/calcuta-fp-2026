@@ -336,16 +336,17 @@ function AuctionHumor({ participants, lots, fmt }: {
   const { lot: porLot, owner: porOwner } = ownerOf('POR')
 
   // Hardcoded por nombre
-  const arechibert = byName('arechibert')
-  const roca       = byName('roca')
-  const lorenza    = byName('lorenza')
-  const macarena   = byName('macarena')
-  const migolazo   = byName('murguia') ?? byName('murguía') ?? byName('migolazo')
-  const gil        = byName('gil')
-  const grizzly    = byName('grizzly') ?? byName('urdaneta')
-  const guri       = byName('guri')
-  const cheni      = byName('cheni')
-  const gambajoe   = byName('gambajoe') ?? byName('gamba')
+  const arechibert  = byName('arechibert')
+  const roca        = byName('roca')
+  const lorenza     = byName('lorenza')
+  const macarena    = byName('macarena')
+  const migolazo    = byName('murguia') ?? byName('murguía') ?? byName('migolazo')
+  const gil         = byName('gil')
+  const grizzly     = byName('grizzly') ?? byName('urdaneta')
+  const guri        = byName('guri')
+  const cheni       = byName('cheni')
+  const gambajoe    = byName('gambajoe') ?? byName('gamba')
+  const alvarezGallo = byName('alvarez') ?? byName('gallo')
 
   const cards: { emoji: string; title: string; titleStrike?: string; name: string; desc: string; color: string }[] = []
 
@@ -355,10 +356,12 @@ function AuctionHumor({ participants, lots, fmt }: {
       desc:`Hace lo que sea por no pasar desapercibido... pujó ${fmt(totalBids(ricachon.id))} y por poco pone su casa en la línea.`,
       color:'bg-amber-50 border-amber-200' })
 
-  if (codo && codolot)
+  if (codo && codolot) {
+    const teamsStr = (codolot as any).teams?.map((t: any) => t.name).filter(Boolean).join(' + ') ?? ''
     cards.push({ emoji:'🤏', title:'El Maestro', name: codo.name,
-      desc:`Compró el lote más barato de la noche por apenas ${fmt(codolot.final_price??0)}. ¡Un maestro de la negociación!`,
+      desc:`Lote ${(codolot as any).number}${teamsStr ? ` (${teamsStr})` : ''} por apenas ${fmt(codolot.final_price??0)}. ¡Un maestro de la negociación que sabe exactamente lo que vale cada lote!`,
       color:'bg-green-50 border-green-200' })
+  }
 
   if (dormidos.length > 0)
     cards.push({ emoji:'😴', title: dormidos.length===1?'El Dormido':'Los Dormidos', name: dormidos.map(d=>d.name).join(', '),
@@ -372,12 +375,12 @@ function AuctionHumor({ participants, lots, fmt }: {
 
   if (argOwner && argLot)
     cards.push({ emoji:'🥶', titleStrike:'El Pechofrío', title:'La de Rosario', name: argOwner.name,
-      desc:`La decisión más sabia de la noche. Compró al campeón del mundo y lo sabía desde el principio.`,
+      desc:`Silenciosa hasta las últimas instancias de la puja pero tenía un plan maestro: ir por el campeón del mundo Argentina por ${fmt(argLot.final_price??0)}. ¿Decisión más sabia de la noche o fracaso inminente?`,
       color:'bg-sky-50 border-sky-200' })
 
   if (mexOwner && mexLot)
     cards.push({ emoji:'🇲🇽', title:'El Patriota', name: mexOwner.name,
-      desc:`Compró a México. El amor a la patria no tiene precio...`,
+      desc:`Compró a México por ${fmt(mexLot.final_price??0)}. El amor a la patria no tiene precio...`,
       color:'bg-green-50 border-green-300' })
 
   if (ganga && gangaLot)
@@ -387,18 +390,21 @@ function AuctionHumor({ participants, lots, fmt }: {
 
   if (espOwner && espLot && (espLot.final_price??0)>2000)
     cards.push({ emoji:'👑', title:'El Ludópata Gachupín', name: espOwner.name,
-      desc:`Pagó una fortuna por España #1 FIFA. Listo para cobrar... o llorar.`,
+      desc:`Pagó ${fmt(espLot.final_price??0)} por España #1 FIFA. Listo para cobrar... o llorar.`,
       color:'bg-orange-50 border-orange-200' })
 
   if (porOwner && porLot)
     cards.push({ emoji:'🦅', title:'El Bicholover', name: porOwner.name,
-      desc:`Fan de Cristiano o del buen fútbol, tú decides.`,
+      desc:`¿Fan de Cristiano o del buen fútbol? Solo el tiempo dirá.`,
       color:'bg-red-50 border-red-200' })
 
-  if (arechibert)
-    cards.push({ emoji:'🧠', title:'Los Conocedores', name: arechibert.name,
-      desc:`Expertos del fútbol mundial. Saben de táctica, de análisis... y de apostar con conocimiento.`,
-      color:'bg-indigo-50 border-indigo-200' })
+  if (arechibert) {
+    const archLots = lots.filter(l => l.status==='sold' && l.ownerships?.some((o:any) => o.participant_id === arechibert.id))
+    const archDesc = archLots.length > 0
+      ? `Expertos del fútbol mundial. Compró ${archLots.length} lote${archLots.length>1?'s':''}: ${archLots.map((l:any)=>l.title).join(' y ')}. Saben de táctica, de análisis... y de apostar con conocimiento.`
+      : `Expertos del fútbol mundial. Saben de táctica, de análisis... y de apostar con conocimiento.`
+    cards.push({ emoji:'🧠', title:'Los Conocedores', name: arechibert.name, desc: archDesc, color:'bg-indigo-50 border-indigo-200' })
+  }
 
   if (roca)
     cards.push({ emoji:'🏃', title:'El Retirado', name: roca.name,
@@ -423,7 +429,7 @@ function AuctionHumor({ participants, lots, fmt }: {
 
   if (grizzly)
     cards.push({ emoji:'✈️', title:'El Turista', name: grizzly.name,
-      desc:`Hizo el viaje desde lejos para unirse a la Calcuta y se llevó a Bosnia y Herzegovina. El esfuerzo fue épico, el lote... pintoresco.`,
+      desc:`Su desempeño se vio afectado por los tequilas de bienvenida. Hizo el viaje desde lejos para unirse a la Calcuta y se llevó a Bosnia y Herzegovina. El esfuerzo fue épico, el lote... pintoresco.`,
       color:'bg-cyan-50 border-cyan-200' })
 
   if (guri)
@@ -441,12 +447,17 @@ function AuctionHumor({ participants, lots, fmt }: {
       desc:`Cuando todos corrían por los favoritos, él apostó por Haití en su debut histórico. Visión distinta, ritmo diferente, corazón grande.`,
       color:'bg-emerald-50 border-emerald-200' })
 
+  if (alvarezGallo)
+    cards.push({ emoji:'💍', title:'Entre Bodas y Remodelaciones', name: 'Familia Álvarez Gallo',
+      desc:`Planear una boda y remodelar un depto tiene sus limitaciones presupuestales. Se tendrán que conformar con el Lote 9 — Japón + Canadá + Sudáfrica + Iraq. ¡Prioridades!`,
+      color:'bg-pink-50 border-pink-200' })
+
   if (cards.length === 0) return null
 
   return (
     <div>
       <h2 className="text-xs font-bold uppercase tracking-widest text-brand-slate mb-3 flex items-center gap-2">
-        🎭 Resumen de la Subasta
+        🎭 Headlines de la Subasta
       </h2>
       <div className="grid gap-3 sm:grid-cols-2">
         {cards.map(({ emoji, title, titleStrike, name, desc, color }) => (

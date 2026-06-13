@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
-import { Save, RotateCcw, AlertTriangle } from 'lucide-react'
+import { Save, RotateCcw, AlertTriangle, Lock } from 'lucide-react'
+import { useIsAdmin } from '@/hooks/useIsAdmin'
 
 export default function SettingsPage() {
   const supabase = createClient()
+  const isAdmin = useIsAdmin()
   const [settings, setSettings] = useState<any>(null)
   const [rules, setRules] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -88,9 +90,15 @@ export default function SettingsPage() {
             </div>
           ))}
         </div>
-        <button onClick={saveSettings} disabled={loading} className="btn-primary">
-          <Save className="h-4 w-4" />{loading ? 'Guardando...' : 'Guardar cambios'}
-        </button>
+        {isAdmin ? (
+          <button onClick={saveSettings} disabled={loading} className="btn-primary">
+            <Save className="h-4 w-4" />{loading ? 'Guardando...' : 'Guardar cambios'}
+          </button>
+        ) : (
+          <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+            <Lock className="h-3.5 w-3.5" /> Solo el moderador puede guardar cambios
+          </div>
+        )}
       </div>
 
       {/* Reparto */}
@@ -105,8 +113,9 @@ export default function SettingsPage() {
           {rules.map((rule: any) => (
             <div key={rule.id} className="flex items-center gap-4 rounded-lg bg-brand-bg p-3">
               <input type="checkbox" checked={rule.enabled}
-                onChange={(e) => saveRule({ ...rule, enabled: e.target.checked })}
-                className="h-4 w-4 accent-brand-gold" />
+                onChange={(e) => isAdmin && saveRule({ ...rule, enabled: e.target.checked })}
+                disabled={!isAdmin}
+                className="h-4 w-4 accent-brand-gold disabled:opacity-40" />
               <div className="flex-1">
                 <p className="text-sm font-semibold text-brand-navy">{rule.name}</p>
                 <p className="text-xs text-gray-400">{rule.description}</p>
@@ -123,12 +132,18 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Reset */}
+      {/* Reset — solo moderador */}
       <div className="card border-red-100">
         <div className="flex items-center gap-2 mb-3">
           <AlertTriangle className="h-5 w-5 text-red-500" />
           <h2 className="font-bold text-red-600">Zona de Reset</h2>
         </div>
+        {!isAdmin ? (
+          <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+            <Lock className="h-3.5 w-3.5" /> Solo el moderador puede ejecutar resets
+          </div>
+        ) : (
+        <>
         <p className="text-sm text-gray-500 mb-4">
           Estas acciones son irreversibles. Úsalas solo si necesitas reiniciar la subasta o hacer pruebas.
         </p>
@@ -148,6 +163,8 @@ export default function SettingsPage() {
           <p><strong>Reset subasta:</strong> borra bids, ownerships, regresa lotes a "pendiente".</p>
           <p><strong>Reset completo:</strong> todo lo anterior + participantes, pagos y resultados.</p>
         </div>
+        </>
+        )}
       </div>
 
       {/* Modal de confirmación */}
